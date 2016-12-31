@@ -5,6 +5,7 @@
  *      Author: felix
  */
 
+#include <QtCore/QDebug>
 #include <QtGui/QIntValidator>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
@@ -19,7 +20,11 @@ DialogConnections::DialogConnections(QWidget *parent, Qt::WindowFlags flags):
     QDialog(parent, flags)
 {
     setWindowTitle("Connect to LDAP server");
+
+    connections = new ModelConnections(this);
+
     initLayout();
+    resetConnectionsView();
 }
 
 DialogConnections::~DialogConnections()
@@ -28,6 +33,8 @@ DialogConnections::~DialogConnections()
 
 void DialogConnections::newConnection(void)
 {
+    resetConnectionsView();
+
     editConnectionName->clear();
     editHost->clear();
     editPort->setText(DEFAULT_LDAP_PORT);
@@ -35,6 +42,55 @@ void DialogConnections::newConnection(void)
     editAuthDn->clear();
     editAuthPassword->clear();
     editSubOu->clear();
+}
+
+void DialogConnections::saveConnection(void)
+{
+    Connection connection;
+    connection.name = editConnectionName->text();
+    connection.host = editHost->text();
+    connection.port = editPort->text().toInt(nullptr, 10);
+    connection.baseDn = editBaseDn->text();
+    connection.authDn = editAuthDn->text();
+    connection.authPassword = editAuthPassword->text();
+    connection.savePassword = checkboxSaveAuthPassword->isChecked();
+    connection.subOu = editSubOu->text();
+
+    const QModelIndex& index = viewConnections->currentIndex();
+    if (!index.isValid()) {
+        connections->addConnection(connection);
+    } else {
+        connections->updateConnection(index, connection);
+    }
+}
+
+void DialogConnections::deleteConnection(void)
+{
+    const QModelIndex& index = viewConnections->currentIndex();
+    if (!index.isValid()) {
+        return;
+    }
+    connections->deleteConnection(index);
+    resetConnectionsView();
+}
+
+void DialogConnections::selectConnection(const QModelIndex& index)
+{
+    const Connection& connection = connections->getConnection(index);
+
+    editConnectionName->setText(connection.name);
+    editHost->setText(connection.host);
+    editPort->setText(QString::number(connection.port));
+    editBaseDn->setText(connection.baseDn);
+    editAuthDn->setText(connection.authDn);
+    checkboxSaveAuthPassword->setChecked(connection.savePassword);
+    if (connection.savePassword) {
+        editAuthPassword->setText(connection.authPassword);
+    } else {
+        editAuthPassword->clear();
+    }
+    editSubOu->setText(connection.subOu);
+    buttonDeleteConnection->setEnabled(true);
 }
 
 void DialogConnections::initLayout(void)
@@ -58,11 +114,12 @@ void DialogConnections::initLayout(void)
 
     layout->addWidget(new QLabel(tr("Base DN") + ":"), lineIndex, 1, Qt::AlignRight);
     editBaseDn = new QLineEdit();
-    layout->addWidget(editBaseDn, lineIndex++, 2);
+    layout->addWidget(editBaseDn, lineIndex++, 2, 1, 3);
 
     layout->addWidget(new QLabel(tr("Auth DN") + ":"), lineIndex, 1, Qt::AlignRight);
     editAuthDn = new QLineEdit();
-    layout->addWidget(editAuthDn, lineIndex++, 2);
+    editAuthDn->setPlaceholderText("cn=admin,dc=...,dc=...");
+    layout->addWidget(editAuthDn, lineIndex++, 2, 1, 3);
 
     layout->addWidget(new QLabel(tr("Password") + ":"), lineIndex, 1, Qt::AlignRight);
     editAuthPassword = new QLineEdit();
@@ -73,18 +130,42 @@ void DialogConnections::initLayout(void)
 
     layout->addWidget(new QLabel(tr("Sub OU") + ":"), lineIndex, 1, Qt::AlignRight);
     editSubOu = new QLineEdit();
-    layout->addWidget(editSubOu, lineIndex++, 2);
+    layout->addWidget(editSubOu, lineIndex++, 2, 1, 3);
+
+    viewConnections = new QTreeView();
+    viewConnections->setModel(connections);
+    connect(viewConnections, SIGNAL(clicked(const QModelIndex&)), this, SLOT(selectConnection(const QModelIndex&)));
+    layout->addWidget(viewConnections, 1, 0, lineIndex - 1, 1);
 
     QHBoxLayout* layoutConnectionModificationButtons = new QHBoxLayout();
     buttonNewConnection = new QPushButton(tr("New"));
     connect(buttonNewConnection, SIGNAL(clicked()), this, SLOT(newConnection()));
     layoutConnectionModificationButtons->addWidget(buttonNewConnection);
     buttonSaveConnection = new QPushButton(tr("Save"));
+    connect(buttonSaveConnection, SIGNAL(clicked()), this, SLOT(saveConnection()));
     layoutConnectionModificationButtons->addWidget(buttonSaveConnection);
     buttonDeleteConnection = new QPushButton(tr("Delete"));
+    connect(buttonDeleteConnection, SIGNAL(clicked()), this, SLOT(deleteConnection()));
     layoutConnectionModificationButtons->addWidget(buttonDeleteConnection);
 
-    layout->addLayout(layoutConnectionModificationButtons, lineIndex++, 2, 1, 4);
+    layout->addLayout(layoutConnectionModificationButtons, lineIndex, 0);
+
+    QHBoxLayout* layoutDialogButtons = new QHBoxLayout();
+    buttonConnect = new QPushButton(tr("Connect"));
+    connect(buttonConnect, SIGNAL(clicked()), this, SLOT(accept()));
+    layoutDialogButtons->addWidget(buttonConnect);
+    buttonCancel = new QPushButton(tr("Cancel"));
+    connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
+    layoutDialogButtons->addWidget(buttonCancel);
+
+    layout->addLayout(layoutDialogButtons, lineIndex++, 2, 1, 3);
+}
+
+void DialogConnections::resetConnectionsView(void)
+{
+    viewConnections->clearSelection();
+    viewConnections->setCurrentIndex(QModelIndex());
+    buttonDeleteConnection->setEnabled(false);
 }
 
 } /* namespace Flix */

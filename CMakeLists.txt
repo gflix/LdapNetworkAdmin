@@ -6,5 +6,6 @@ set(CMAKE_AUTOMOC ON)
 include_directories(src)
 
 find_package(Qt5Widgets)
-add_executable(ldap-network-admin WIN32 src/LdapNetworkAdmin.cpp src/MainWindow.cpp src/DialogConnections.cpp)
-target_link_libraries(ldap-network-admin Qt5::Widgets)
+find_package(Qt5Xml)
+add_executable(ldap-network-admin WIN32 src/LdapNetworkAdmin.cpp src/MainWindow.cpp src/DialogConnections.cpp src/ModelConnections.cpp)
+target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml)
