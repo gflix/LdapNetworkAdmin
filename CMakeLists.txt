@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.5.0)
+project(LdapNetworkAdmin)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+include_directories(src)
+
+find_package(Qt5Widgets)
+add_executable(ldap-network-admin WIN32 src/LdapNetworkAdmin.cpp src/MainWindow.cpp src/DialogConnections.cpp)
+target_link_libraries(ldap-network-admin Qt5::Widgets)
