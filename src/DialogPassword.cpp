@@ -35,6 +35,7 @@ void DialogPassword::initLayout(void)
     layout->addWidget(new QLabel(tr("Please enter the password") + ":"));
 
     editPassword = new QLineEdit();
+    editPassword->setEchoMode(QLineEdit::EchoMode::Password);
     layout->addWidget(editPassword);
 
     QHBoxLayout* layoutDialogButtons = new QHBoxLayout();

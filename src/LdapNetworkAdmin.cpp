@@ -5,7 +5,6 @@
  *      Author: felix
  */
 
-#include <iostream>
 #include <QtWidgets/QApplication>
 #include <MainWindow.h>
 
