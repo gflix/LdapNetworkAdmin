@@ -31,6 +31,27 @@ DialogConnections::~DialogConnections()
 {
 }
 
+bool DialogConnections::getConnection(Connection& connection) const
+{
+    connection.name = editConnectionName->text();
+    connection.host = editHost->text();
+    connection.port = editPort->text().toInt(nullptr, 10);
+    connection.baseDn = editBaseDn->text();
+    connection.authDn = editAuthDn->text();
+    connection.authPassword = editAuthPassword->text();
+    connection.savePassword = checkboxSaveAuthPassword->isChecked();
+    connection.subOu = editSubOu->text();
+
+    if (connection.name.isEmpty()) {
+        connection.name = connection.host;
+    }
+    if (!connection.savePassword) {
+        connection.authPassword.clear();
+    }
+
+    return true;
+}
+
 void DialogConnections::newConnection(void)
 {
     resetConnectionsView();
@@ -47,14 +68,9 @@ void DialogConnections::newConnection(void)
 void DialogConnections::saveConnection(void)
 {
     Connection connection;
-    connection.name = editConnectionName->text();
-    connection.host = editHost->text();
-    connection.port = editPort->text().toInt(nullptr, 10);
-    connection.baseDn = editBaseDn->text();
-    connection.authDn = editAuthDn->text();
-    connection.authPassword = editAuthPassword->text();
-    connection.savePassword = checkboxSaveAuthPassword->isChecked();
-    connection.subOu = editSubOu->text();
+    if (!getConnection(connection)) {
+        return;
+    }
 
     const QModelIndex& index = viewConnections->currentIndex();
     if (!index.isValid()) {

@@ -27,16 +27,8 @@
 
 namespace Flix {
 
-Connection::Connection(void):
-//    index(0),
-    port(0),
-    savePassword(false)
-{
-}
-
 ModelConnections::ModelConnections(QObject* parent):
-    QAbstractListModel(parent)//,
-//    nextConnectionIndex(1)
+    QAbstractListModel(parent)
 {
     load();
 }
@@ -91,7 +83,6 @@ QVariant ModelConnections::headerData(int section, Qt::Orientation orientation, 
 
 void ModelConnections::addConnection(const Connection& connection)
 {
-//    connection.index = nextConnectionIndex++;
     connections.push_back(connection);
     save();
 
@@ -129,7 +120,6 @@ void ModelConnections::deleteConnection(const QModelIndex& index)
 void ModelConnections::load(void)
 {
     QFile fileConnections(QStandardPaths::locate(QStandardPaths::ConfigLocation, FILENAME_CONNECTIONS));
-//    qDebug() << "ModelConnections::load(" << fileConnections.fileName() << ")";
     connections.clear();
     if (!fileConnections.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qInfo() << "Could not open file for reading \"" << fileConnections.fileName() << "\"! Skipping.";
@@ -150,7 +140,6 @@ void ModelConnections::load(void)
         elementConnection = elementConnection.nextSiblingElement(XML_ELEMENT_CONNECTION)) {
         Connection connection;
 
-//        connection.index = nextConnectionIndex++;
         connection.name = elementConnection.attribute(XML_ATTRIBUTE_NAME);
         connection.host = elementConnection.attribute(XML_ATTRIBUTE_HOST);
         connection.port = elementConnection.attribute(XML_ATTRIBUTE_PORT, "-1").toInt(nullptr, 10);
@@ -168,7 +157,6 @@ void ModelConnections::save(void)
 {
     QDir dirConnections { QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) };
     QFile fileConnections(dirConnections.filePath(FILENAME_CONNECTIONS));
-//    qDebug() << "ModelConnections::save(" << fileConnections.fileName() << ")";
 
     if (!fileConnections.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "Could not open file for writing \"" << fileConnections.fileName() << "\"!";

@@ -10,6 +10,8 @@
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QMainWindow>
+#include <Common.h>
+#include <LdapConnection.h>
 
 namespace Flix {
 
@@ -20,14 +22,20 @@ class MainWindow: public QMainWindow {
     QAction* actionDisconnect;
     QAction* actionQuit;
 
+    LdapConnection ldapConnection;
+
     void initActions(void);
     void initMenuBar(void);
+    void setWindowTitleWithState(const QString& state = QString());
+
+    void connectToLdapServer(const Connection& connection);
 public:
     MainWindow();
     virtual ~MainWindow();
 
 public slots:
     void showConnectionsDialog(void);
+    void disconnectFromLdapServer(void);
 };
 
 } /* namespace Flix */

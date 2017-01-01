@@ -9,32 +9,14 @@
 #define SRC_MODELCONNECTIONS_H_
 
 #include <QtCore/QAbstractListModel>
-#include <QtCore/QList>
+#include <Common.h>
 
 namespace Flix {
-
-struct Connection
-{
-    Connection();
-
-//    int index;
-    QString name;
-    QString host;
-    int port;
-    QString baseDn;
-    QString authDn;
-    QString authPassword;
-    bool savePassword;
-    QString subOu;
-};
-
-typedef QList<Connection> Connections;
 
 class ModelConnections: public QAbstractListModel {
     Q_OBJECT
 
     Connections connections;
-//    int nextConnectionIndex;
     void load(void);
     void save(void);
 public:
