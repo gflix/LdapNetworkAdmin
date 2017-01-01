@@ -37,6 +37,14 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1017489782" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.667780277" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+								<option id="gnu.cpp.link.option.libs.479514078" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="Qt5Widgets"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="Qt5Gui"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="Qt5Xml"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="Qt5Core"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ldap"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="lber"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.745096737" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -48,6 +56,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="CMakeFiles/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
