@@ -13,6 +13,12 @@
 
 namespace Flix {
 
+enum class LdapSearchScope {
+    BASE,
+    ONE,
+    SUBTREE
+};
+
 class LdapConnection {
     LDAP* handle;
 
@@ -27,6 +33,8 @@ public:
 
     bool isBound(void) const;
     const Connection& getConnection(void) const;
+
+    bool search(LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)"));
 };
 
 } /* namespace Flix */

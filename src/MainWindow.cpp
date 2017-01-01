@@ -6,6 +6,8 @@
  */
 
 #include <QtCore/QDebug>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 #include <MainWindow.h>
@@ -19,6 +21,7 @@ MainWindow::MainWindow()
     setWindowTitleWithState();
     initActions();
     initMenuBar();
+    initLayout();
 }
 
 MainWindow::~MainWindow()
@@ -41,6 +44,13 @@ void MainWindow::disconnectFromLdapServer(void)
     ldapConnection.unbind();
     setWindowTitleWithState();
     actionDisconnect->setEnabled(false);
+}
+
+void MainWindow::updateNetworkTree(void)
+{
+    if (!ldapConnection.isBound()) {
+        return;
+    }
 }
 
 void MainWindow::initActions(void)
@@ -66,6 +76,17 @@ void MainWindow::initMenuBar(void)
     menuEntry->addAction(actionDisconnect);
     menuEntry->addSeparator();
     menuEntry->addAction(actionQuit);
+}
+
+void MainWindow::initLayout(void)
+{
+    QHBoxLayout* layout = new QHBoxLayout();
+
+    layout->addWidget(new QLabel(tr("Network tree")));
+
+    QWidget* centralWidget = new QWidget();
+    centralWidget->setLayout(layout);
+    setCentralWidget(centralWidget);
 }
 
 void MainWindow::setWindowTitleWithState(const QString& state)
@@ -94,12 +115,18 @@ void MainWindow::connectToLdapServer(const Connection& connection)
         }
         authPassword = dialog.getPassword();
     }
-    if (ldapConnection.bind(connection, authPassword)) {
-        setWindowTitleWithState(connection.name);
-        actionDisconnect->setEnabled(true);
-    } else {
+    if (!ldapConnection.bind(connection, authPassword)) {
         disconnectFromLdapServer();
         QMessageBox::critical(this, tr("LDAP server connection"), tr("Could not connect to LDAP server!"));
+        return;
+    }
+    setWindowTitleWithState(connection.name);
+    actionDisconnect->setEnabled(true);
+
+    if (ldapConnection.search()) {
+        qInfo() << "INFO: Search was successful";
+    } else {
+        qCritical() << "ERROR: Could not perform search!";
     }
 }
 

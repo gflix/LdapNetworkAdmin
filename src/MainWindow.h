@@ -26,12 +26,16 @@ class MainWindow: public QMainWindow {
 
     void initActions(void);
     void initMenuBar(void);
+    void initLayout(void);
     void setWindowTitleWithState(const QString& state = QString());
 
     void connectToLdapServer(const Connection& connection);
 public:
     MainWindow();
     virtual ~MainWindow();
+
+protected slots:
+    void updateNetworkTree(void);
 
 public slots:
     void showConnectionsDialog(void);

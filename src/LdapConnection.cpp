@@ -52,6 +52,7 @@ bool LdapConnection::bind(const Connection& newConnection, const QString& authPa
     }
 
     connection = newConnection;
+    bound = true;
     return true;
 }
 
@@ -76,6 +77,44 @@ bool LdapConnection::isBound(void) const
 const Connection& LdapConnection::getConnection(void) const
 {
     return connection;
+}
+
+bool LdapConnection::search(LdapSearchScope searchScope, const QString& filter)
+{
+    if (!bound) {
+        return false;
+    }
+
+    QString searchBaseDn;
+    if (!connection.subOu.isEmpty()) {
+        searchBaseDn = connection.subOu + ",";
+    }
+    searchBaseDn += connection.baseDn;
+    std::unique_ptr<char> ldapSearchBaseDn { strdup(searchBaseDn.toStdString().c_str()) };
+    int ldapSearchScope;
+    switch (searchScope) {
+    case LdapSearchScope::ONE:
+        ldapSearchScope = LDAP_SCOPE_ONE;
+        break;
+    case LdapSearchScope::SUBTREE:
+        ldapSearchScope = LDAP_SCOPE_SUBTREE;
+        break;
+    default:
+        ldapSearchScope = LDAP_SCOPE_BASE;
+        break;
+    }
+    std::unique_ptr<char> ldapFilter { strdup(filter.toStdString().c_str()) };
+    timeval timeout;
+    timeout.tv_sec = 10;
+    timeout.tv_usec = 0;
+    LDAPMessage* ldapMessage = nullptr;
+    if (ldap_search_ext_s(handle, ldapSearchBaseDn.get(), ldapSearchScope, ldapFilter.get(), nullptr, 0, nullptr, nullptr, &timeout, 256, &ldapMessage) != LDAP_SUCCESS) {
+        return false;
+    }
+    Q_ASSERT(ldapMessage);
+    ldap_msgfree(ldapMessage);
+
+    return true;
 }
 
 } /* namespace Flix */
