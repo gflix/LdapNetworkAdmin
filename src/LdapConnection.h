@@ -9,7 +9,7 @@
 #define SRC_LDAPCONNECTION_H_
 
 #include <ldap.h>
-#include <string>
+#include <Common.h>
 
 namespace Flix {
 
@@ -17,14 +17,16 @@ class LdapConnection {
     LDAP* handle;
 
     bool bound;
+    Connection connection;
 public:
     LdapConnection();
     virtual ~LdapConnection();
 
-    bool bind(const std::string& host, int port, const std::string& authDn, const std::string& authPassword);
+    bool bind(const Connection& connection, const QString& authPassword);
     void unbind();
 
     bool isBound(void) const;
+    const Connection& getConnection(void) const;
 };
 
 } /* namespace Flix */

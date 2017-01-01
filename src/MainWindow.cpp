@@ -94,7 +94,7 @@ void MainWindow::connectToLdapServer(const Connection& connection)
         }
         authPassword = dialog.getPassword();
     }
-    if (ldapConnection.bind(connection.host.toStdString(), connection.port, connection.authDn.toStdString(), authPassword.toStdString())) {
+    if (ldapConnection.bind(connection, authPassword)) {
         setWindowTitleWithState(connection.name);
         actionDisconnect->setEnabled(true);
     } else {
