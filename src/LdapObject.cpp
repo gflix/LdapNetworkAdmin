@@ -71,4 +71,15 @@ LdapAttributeValues LdapObject::getAttribute(const QString& attribute) const
     return attributes[attribute];
 }
 
+LdapObject LdapObject::createOrganizationalUnit(const QString& distinguishedName)
+{
+    LdapObject object;
+
+    object.setDistinguishedName(distinguishedName);
+    LdapAttributeValues values { LDAP_OBJECT_CLASS_TOP, LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT };
+    object.setAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS, values);
+
+    return object;
+}
+
 } /* namespace Flix */

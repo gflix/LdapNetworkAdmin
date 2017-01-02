@@ -32,6 +32,8 @@ public:
     QString getShortName(void) const;
     bool hasAttribute(const QString& attribute) const;
     LdapAttributeValues getAttribute(const QString& attribute) const;
+
+    static LdapObject createOrganizationalUnit(const QString& distinguishedName);
 };
 
 typedef QList<LdapObject> LdapObjects;
