@@ -121,6 +121,8 @@ void MainWindow::initActions(void)
     actionQuit->setShortcut(Qt::CTRL | Qt::Key_Q);
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
+    actionAddOrganizationalUnit = new QAction(tr("Organizational &unit"), this);
+
     connect(this, SIGNAL(connectedToLdapServer()), this, SLOT(updateNetworkTree()));
 }
 
@@ -130,6 +132,12 @@ void MainWindow::initMenuBar(void)
     menuEntry->addAction(actionConnect);
     menuEntry->addAction(actionDisconnect);
     menuEntry->addAction(actionRefresh);
+    menuEntry->addSeparator();
+
+    QMenu* subMenu = new QMenu(tr("&Add"));
+    subMenu->addAction(actionAddOrganizationalUnit);
+    menuEntry->addMenu(subMenu);
+
     menuEntry->addSeparator();
     menuEntry->addAction(actionQuit);
 }
@@ -146,6 +154,14 @@ void MainWindow::initLayout(void)
     connect(viewNetworkTree, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(networkTreeCollapsed(const QModelIndex&)));
     connect(viewNetworkTree, SIGNAL(expanded(const QModelIndex&)), this, SLOT(networkTreeExpanded(const QModelIndex&)));
     layout->addWidget(viewNetworkTree);
+
+    QHBoxLayout* layoutButtons = new QHBoxLayout();
+    QPushButton* button = new QPushButton(tr("Add"));
+    QMenu* subMenu = new QMenu();
+    subMenu->addAction(actionAddOrganizationalUnit);
+    button->setMenu(subMenu);
+    layoutButtons->addWidget(button);
+    layout->addLayout(layoutButtons);
 
     QWidget* centralWidget = new QWidget();
     centralWidget->setLayout(layout);

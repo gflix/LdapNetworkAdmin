@@ -25,6 +25,8 @@ class MainWindow: public QMainWindow {
     QAction* actionRefresh;
     QAction* actionQuit;
 
+    QAction* actionAddOrganizationalUnit;
+
     QTreeView* viewNetworkTree;
     ModelNetworkTree* networkTree;
 
