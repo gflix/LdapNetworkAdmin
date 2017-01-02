@@ -141,6 +141,7 @@ void MainWindow::initLayout(void)
     layout->addWidget(new QLabel(tr("Network tree")));
 
     viewNetworkTree = new QTreeView();
+    viewNetworkTree->setHeaderHidden(true);
     viewNetworkTree->setModel(networkTree);
     connect(viewNetworkTree, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(networkTreeCollapsed(const QModelIndex&)));
     connect(viewNetworkTree, SIGNAL(expanded(const QModelIndex&)), this, SLOT(networkTreeExpanded(const QModelIndex&)));

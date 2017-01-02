@@ -42,7 +42,7 @@ QVariant ModelNetworkTree::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::DisplayRole) {
-        return item->getObject().getDistinguishedName();
+        return item->getObject().getShortName();
     }
     return QVariant();
 }

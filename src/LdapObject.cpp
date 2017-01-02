@@ -44,6 +44,20 @@ const QString& LdapObject::getDistinguishedName(void) const
     return distinguishedName;
 }
 
+QString LdapObject::getShortName(void) const
+{
+    QString shortenedName { distinguishedName };
+    int separatorPosition = distinguishedName.indexOf(',');
+    if (separatorPosition >= 0) {
+        shortenedName = shortenedName.mid(0, separatorPosition);
+    }
+    separatorPosition = shortenedName.indexOf('=');
+    if (separatorPosition >= 0) {
+        shortenedName = shortenedName.mid(separatorPosition + 1);
+    }
+    return shortenedName;
+}
+
 bool LdapObject::hasAttribute(const QString& attribute) const
 {
     return attributes.contains(attribute);
