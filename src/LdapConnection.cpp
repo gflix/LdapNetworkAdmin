@@ -6,7 +6,7 @@
  */
 
 #include <memory>
-// #include <QtCore/QDebug>
+#include <QtCore/QDebug>
 #include <LdapConnection.h>
 
 namespace Flix {
@@ -80,7 +80,26 @@ const Connection& LdapConnection::getConnection(void) const
     return connection;
 }
 
-bool LdapConnection::search(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope, const QString& filter)
+bool LdapConnection::addObject(const LdapObject& object) const
+{
+    if (!bound && !object.isValid()) {
+        return false;
+    }
+
+    LDAPMod attributeObjectClass;
+    LDAPMod* attributes[] = { &attributeObjectClass, nullptr };
+
+    attributeObjectClass.mod_op = 0;
+    attributeObjectClass.mod_type = strdup("objectClass");
+    char* objectClassValues[] = { strdup("top"), strdup("organizationalUnit"), nullptr };
+    attributeObjectClass.mod_values = objectClassValues;
+
+    std::unique_ptr<char> distinguishedName { strdup(object.getDistinguishedName().toStdString().c_str()) };
+
+    return ldap_add_ext_s(handle, distinguishedName.get(), attributes, nullptr, nullptr) == LDAP_SUCCESS;
+}
+
+bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope, const QString& filter) const
 {
     objects.clear();
     if (!bound) {
@@ -137,7 +156,7 @@ bool LdapConnection::search(LdapObjects& objects, const QString& searchBaseDn, L
     return returnValue;
 }
 
-void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object)
+void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object) const
 {
     object.clear();
     Q_ASSERT(bound);

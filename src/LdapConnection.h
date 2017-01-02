@@ -26,7 +26,7 @@ class LdapConnection {
     bool bound;
     Connection connection;
 
-    void retrieveLdapObject(LDAPMessage* message, LdapObject& object);
+    void retrieveLdapObject(LDAPMessage* message, LdapObject& object) const;
 public:
     LdapConnection();
     virtual ~LdapConnection();
@@ -37,7 +37,8 @@ public:
     bool isBound(void) const;
     const Connection& getConnection(void) const;
 
-    bool search(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)"));
+    bool addObject(const LdapObject& object) const;
+    bool searchObjects(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)")) const;
 };
 
 } /* namespace Flix */

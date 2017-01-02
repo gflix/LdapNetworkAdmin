@@ -13,6 +13,7 @@
 #include <MainWindow.h>
 #include <DialogConnections.h>
 #include <DialogPassword.h>
+#include <DialogTextInput.h>
 
 namespace Flix {
 
@@ -39,7 +40,7 @@ void MainWindow::showConnectionsDialog(void)
         if (dialog.getConnection(connection)) {
             if (!connectToLdapServer(connection)) {
                 disconnectFromLdapServer();
-                QMessageBox::critical(this, tr("LDAP server connection"), tr("Could not connect to LDAP server!"));
+                QMessageBox::critical(this, tr("Error"), tr("Could not connect to LDAP server!"));
             } else {
                 setWindowTitleWithState(connection.name);
                 actionRefresh->setEnabled(true);
@@ -59,6 +60,23 @@ void MainWindow::disconnectFromLdapServer(void)
     actionDisconnect->setEnabled(false);
 }
 
+void MainWindow::addOrganizationalUnit(void)
+{
+    const QModelIndex& index = viewNetworkTree->currentIndex();
+    NetworkTreeItem* item = networkTree->getItem(index);
+    if (!ldapConnection.isBound() || !index.isValid() || !item->isContainerObject()) {
+        return;
+    }
+
+    DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
+    if (dialog.exec() == QDialog::DialogCode::Accepted) {
+        LdapObject object = LdapObject::createOrganizationalUnit(joinDistinguishedName({ item->getObject().getDistinguishedName(), "ou=" + dialog.getTextInput() }));
+        if (!ldapConnection.addObject(object)) {
+            QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
+        }
+    }
+}
+
 void MainWindow::updateNetworkTree(void)
 {
     networkTree->clear();
@@ -68,7 +86,7 @@ void MainWindow::updateNetworkTree(void)
 
     const Connection& connection = ldapConnection.getConnection();
     LdapObjects objects;
-    if (ldapConnection.search(objects, joinDistinguishedName({connection.baseDn, connection.subOu}), LdapSearchScope::BASE) && objects.size() == 1) {
+    if (ldapConnection.searchObjects(objects, joinDistinguishedName({connection.baseDn, connection.subOu}), LdapSearchScope::BASE) && objects.size() == 1) {
         for (auto& object: objects) {
             networkTree->addChild(object, QModelIndex());
         }
@@ -86,7 +104,7 @@ void MainWindow::networkTreeExpanded(const QModelIndex& index)
     }
     const LdapObject& searchBaseObject = item->getObject();
     LdapObjects objects;
-    if (ldapConnection.search(objects, searchBaseObject.getDistinguishedName(), LdapSearchScope::ONE)) {
+    if (ldapConnection.searchObjects(objects, searchBaseObject.getDistinguishedName(), LdapSearchScope::ONE)) {
         for (auto& object: objects) {
             networkTree->addChild(object, index);
         }
@@ -122,6 +140,7 @@ void MainWindow::initActions(void)
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
     actionAddOrganizationalUnit = new QAction(tr("Organizational &unit"), this);
+    connect(actionAddOrganizationalUnit, SIGNAL(triggered()), this, SLOT(addOrganizationalUnit()));
 
     connect(this, SIGNAL(connectedToLdapServer()), this, SLOT(updateNetworkTree()));
 }

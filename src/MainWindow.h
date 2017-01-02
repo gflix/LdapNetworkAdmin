@@ -53,6 +53,7 @@ protected slots:
 public slots:
     void showConnectionsDialog(void);
     void disconnectFromLdapServer(void);
+    void addOrganizationalUnit(void);
 };
 
 } /* namespace Flix */
