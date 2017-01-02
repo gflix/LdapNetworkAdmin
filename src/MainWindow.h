@@ -45,6 +45,8 @@ signals:
 
 protected slots:
     void updateNetworkTree(void);
+    void networkTreeCollapsed(const QModelIndex& index);
+    void networkTreeExpanded(const QModelIndex& index);
 
 public slots:
     void showConnectionsDialog(void);

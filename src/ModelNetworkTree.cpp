@@ -6,6 +6,7 @@
  */
 
 #include <ModelNetworkTree.h>
+#include <LdapTags.h>
 
 namespace Flix {
 
@@ -84,6 +85,22 @@ int ModelNetworkTree::columnCount(const QModelIndex& parent) const
     return 1;
 }
 
+bool ModelNetworkTree::hasChildren(const QModelIndex& parent) const
+{
+    NetworkTreeItem* item = getItem(parent);
+    if (!item) {
+        return false;
+    }
+    // the root item is not visible but needs to have children
+    if (item == root) {
+        return true;
+    }
+    const LdapAttributeValues objectClasses = item->getObject().getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
+    return
+        objectClasses.contains(LDAP_OBJECT_CLASS_DC_OBJECT) ||
+        objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
+}
+
 bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &parent)
 {
     NetworkTreeItem* item = getItem(parent);
@@ -93,6 +110,20 @@ bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &par
     item->addChild(object);
     emit layoutChanged();
     return true;
+}
+
+void ModelNetworkTree::deleteTree(const QModelIndex& parent)
+{
+    NetworkTreeItem* item = getItem(parent);
+    if (!item) {
+        return;
+    }
+    int rowCount = item->getChildCount();
+    if (rowCount > 0) {
+        beginRemoveRows(parent, 0, rowCount);
+        item->clearChildren();
+        endRemoveRows();
+    }
 }
 
 NetworkTreeItem* ModelNetworkTree::getItem(const QModelIndex& index) const

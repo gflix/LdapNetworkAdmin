@@ -53,6 +53,7 @@ void MainWindow::showConnectionsDialog(void)
 void MainWindow::disconnectFromLdapServer(void)
 {
     ldapConnection.unbind();
+    networkTree->clear();
     setWindowTitleWithState();
     actionRefresh->setEnabled(false);
     actionDisconnect->setEnabled(false);
@@ -72,6 +73,32 @@ void MainWindow::updateNetworkTree(void)
             networkTree->addChild(object, QModelIndex());
         }
     }
+}
+
+void MainWindow::networkTreeExpanded(const QModelIndex& index)
+{
+    if (!index.isValid() || !ldapConnection.isBound()) {
+        return;
+    }
+    NetworkTreeItem* item = networkTree->getItem(index);
+    if (!item) {
+        return;
+    }
+    const LdapObject& searchBaseObject = item->getObject();
+    LdapObjects objects;
+    if (ldapConnection.search(objects, searchBaseObject.getDistinguishedName(), LdapSearchScope::ONE)) {
+        for (auto& object: objects) {
+            networkTree->addChild(object, index);
+        }
+    }
+}
+
+void MainWindow::networkTreeCollapsed(const QModelIndex& index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+    networkTree->deleteTree(index);
 }
 
 void MainWindow::initActions(void)
@@ -115,6 +142,8 @@ void MainWindow::initLayout(void)
 
     viewNetworkTree = new QTreeView();
     viewNetworkTree->setModel(networkTree);
+    connect(viewNetworkTree, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(networkTreeCollapsed(const QModelIndex&)));
+    connect(viewNetworkTree, SIGNAL(expanded(const QModelIndex&)), this, SLOT(networkTreeExpanded(const QModelIndex&)));
     layout->addWidget(viewNetworkTree);
 
     QWidget* centralWidget = new QWidget();

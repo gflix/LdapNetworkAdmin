@@ -6,6 +6,7 @@
  */
 
 #include <LdapObject.h>
+#include <LdapTags.h>
 
 namespace Flix {
 
@@ -35,7 +36,7 @@ void LdapObject::setAttribute(const QString& attribute, const LdapAttributeValue
 
 bool LdapObject::isValid(void) const
 {
-    return !distinguishedName.isEmpty() && hasAttribute("objectClass");
+    return !distinguishedName.isEmpty() && hasAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
 }
 
 const QString& LdapObject::getDistinguishedName(void) const
@@ -46,6 +47,14 @@ const QString& LdapObject::getDistinguishedName(void) const
 bool LdapObject::hasAttribute(const QString& attribute) const
 {
     return attributes.contains(attribute);
+}
+
+LdapAttributeValues LdapObject::getAttribute(const QString& attribute) const
+{
+    if (!attributes.contains(attribute)) {
+        return { };
+    }
+    return attributes[attribute];
 }
 
 } /* namespace Flix */

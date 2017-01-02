@@ -30,6 +30,7 @@ public:
     bool isValid(void) const;
     const QString& getDistinguishedName(void) const;
     bool hasAttribute(const QString& attribute) const;
+    LdapAttributeValues getAttribute(const QString& attribute) const;
 };
 
 typedef QList<LdapObject> LdapObjects;
