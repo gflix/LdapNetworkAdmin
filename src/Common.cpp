@@ -15,4 +15,21 @@ Connection::Connection(void):
 {
 }
 
+QString joinDistinguishedName(const LdapDistinguishedNameParts& parts)
+{
+    QString distinguishedName;
+    int index = 0;
+    for (auto part: parts) {
+        if (part.isEmpty()) {
+            continue;
+        }
+        if (index > 0) {
+            distinguishedName = ',' + distinguishedName;
+        }
+        distinguishedName = part + distinguishedName;
+        ++index;
+    }
+    return distinguishedName;
+}
+
 } /* namespace Flix */

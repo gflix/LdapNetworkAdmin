@@ -29,6 +29,10 @@ struct Connection
 
 typedef QList<Connection> Connections;
 
+typedef QList<QString> LdapDistinguishedNameParts;
+
+QString joinDistinguishedName(const LdapDistinguishedNameParts& parts);
+
 } /* namespace Flix */
 
 #endif /* SRC_COMMON_H_ */
