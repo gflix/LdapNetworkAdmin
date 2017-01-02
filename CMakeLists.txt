@@ -37,6 +37,7 @@ add_executable(
 	src/MainWindow.cpp
 	src/DialogConnections.cpp
 	src/DialogPassword.cpp
+	src/DialogTextInput.cpp
 	src/ModelConnections.cpp
 	src/ModelNetworkTree.cpp
 	src/LdapConnection.cpp
