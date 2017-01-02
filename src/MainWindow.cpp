@@ -44,7 +44,7 @@ void MainWindow::showConnectionsDialog(void)
                 setWindowTitleWithState(connection.name);
                 actionRefresh->setEnabled(true);
                 actionDisconnect->setEnabled(true);
-                emit(connectedToLdapServer());
+                emit connectedToLdapServer();
             }
         }
     }
@@ -60,15 +60,17 @@ void MainWindow::disconnectFromLdapServer(void)
 
 void MainWindow::updateNetworkTree(void)
 {
+    networkTree->clear();
     if (!ldapConnection.isBound()) {
         return;
     }
-    qInfo() << "MainWindow::updateNetworkTree()";
 
     const Connection& connection = ldapConnection.getConnection();
     LdapObjects objects;
     if (ldapConnection.search(objects, joinDistinguishedName({connection.baseDn, connection.subOu}), LdapSearchScope::BASE) && objects.size() == 1) {
-        qInfo() << "INFO: Search was successful, entries=" << objects.size();
+        for (auto& object: objects) {
+            networkTree->addChild(object, QModelIndex());
+        }
     }
 }
 

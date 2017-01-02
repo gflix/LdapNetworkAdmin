@@ -12,15 +12,37 @@ namespace Flix {
 ModelNetworkTree::ModelNetworkTree(QObject *parent):
     QAbstractItemModel(parent)
 {
+    root = new NetworkTreeItem(LdapObject());
 }
 
 ModelNetworkTree::~ModelNetworkTree()
 {
+    delete root;
+}
+
+void ModelNetworkTree::clear(void)
+{
+    int rowCount = root->getChildCount();
+    if (rowCount > 0) {
+        beginRemoveRows(QModelIndex(), 0, rowCount);
+        root->clearChildren();
+        endRemoveRows();
+    }
 }
 
 QVariant ModelNetworkTree::data(const QModelIndex &index, int role) const
 {
-    // TODO: retrieve real data
+    if (!index.isValid()) {
+        return QVariant();
+    }
+    NetworkTreeItem* item = getItem(index);
+    if (!item) {
+        return QVariant();
+    }
+
+    if (role == Qt::DisplayRole) {
+        return item->getObject().getDistinguishedName();
+    }
     return QVariant();
 }
 
@@ -30,7 +52,11 @@ QModelIndex ModelNetworkTree::index(int row, int column, const QModelIndex& pare
         return QModelIndex();
     }
 
-    // TODO: retrieve real index
+    NetworkTreeItem* child = getItem(parent)->getChild(row);
+    if (child) {
+        return createIndex(row, column, child);
+    }
+
     return QModelIndex();
 }
 
@@ -40,20 +66,44 @@ QModelIndex ModelNetworkTree::parent(const QModelIndex& index) const
         return QModelIndex();
     }
 
-    // TODO: retrieve real parent
-    return QModelIndex();
+    NetworkTreeItem* indexParent = getItem(index)->getParent();
+    if (indexParent == root) {
+        return QModelIndex();
+    }
+
+    return createIndex(indexParent->getChildNumber(), 0, indexParent);
 }
 
 int ModelNetworkTree::rowCount(const QModelIndex& parent) const
 {
-    // TODO: retrieve real rowCount
-    return 0;
+    return getItem(parent)->getChildCount();
 }
 
 int ModelNetworkTree::columnCount(const QModelIndex& parent) const
 {
-    // TODO: retrieve real columnCount
     return 1;
+}
+
+bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &parent)
+{
+    NetworkTreeItem* item = getItem(parent);
+    if (!item) {
+        return false;
+    }
+    item->addChild(object);
+    emit layoutChanged();
+    return true;
+}
+
+NetworkTreeItem* ModelNetworkTree::getItem(const QModelIndex& index) const
+{
+    if (index.isValid()) {
+        NetworkTreeItem* item = static_cast<NetworkTreeItem*>(index.internalPointer());
+        if (item) {
+            return item;
+        }
+    }
+    return root;
 }
 
 } /* namespace Flix */

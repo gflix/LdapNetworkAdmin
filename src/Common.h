@@ -10,11 +10,11 @@
 
 #include <QtCore/QList>
 #include <QtCore/QString>
+#include <LdapObject.h>
 
 namespace Flix {
 
-struct Connection
-{
+struct Connection {
     Connection();
 
     QString name;
@@ -28,6 +28,29 @@ struct Connection
 };
 
 typedef QList<Connection> Connections;
+
+class NetworkTreeItem;
+typedef QList<NetworkTreeItem*> NetworkTreeItems;
+
+class NetworkTreeItem {
+    NetworkTreeItem* parent;
+    NetworkTreeItems children;
+
+    LdapObject object;
+public:
+    NetworkTreeItem(const LdapObject& object, NetworkTreeItem* parent = nullptr);
+    virtual ~NetworkTreeItem();
+
+    void clearChildren(void);
+    void addChild(const LdapObject& object);
+
+    NetworkTreeItem* getChild(int number);
+    int getChildCount(void) const;
+    int getChildNumber(void) const;
+    NetworkTreeItem* getParent(void) const;
+    const LdapObject& getObject(void) const;
+};
+
 
 typedef QList<QString> LdapDistinguishedNameParts;
 
