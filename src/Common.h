@@ -49,6 +49,8 @@ public:
     int getChildNumber(void) const;
     NetworkTreeItem* getParent(void) const;
     const LdapObject& getObject(void) const;
+
+    bool isContainerObject(void) const;
 };
 
 

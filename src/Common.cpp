@@ -6,6 +6,7 @@
  */
 
 #include <Common.h>
+#include <LdapTags.h>
 
 namespace Flix {
 
@@ -82,6 +83,14 @@ NetworkTreeItem* NetworkTreeItem::getParent(void) const
 const LdapObject& NetworkTreeItem::getObject(void) const
 {
     return object;
+}
+
+bool NetworkTreeItem::isContainerObject(void) const
+{
+    const LdapAttributeValues objectClasses = object.getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
+    return
+        objectClasses.contains(LDAP_OBJECT_CLASS_DC_OBJECT) ||
+        objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
 }
 
 } /* namespace Flix */

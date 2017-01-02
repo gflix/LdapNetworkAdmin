@@ -95,10 +95,7 @@ bool ModelNetworkTree::hasChildren(const QModelIndex& parent) const
     if (item == root) {
         return true;
     }
-    const LdapAttributeValues objectClasses = item->getObject().getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
-    return
-        objectClasses.contains(LDAP_OBJECT_CLASS_DC_OBJECT) ||
-        objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
+    return item->isContainerObject();
 }
 
 bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &parent)
