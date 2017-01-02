@@ -6,6 +6,7 @@
  */
 
 #include <memory>
+// #include <QtCore/QDebug>
 #include <LdapConnection.h>
 
 namespace Flix {
@@ -79,17 +80,14 @@ const Connection& LdapConnection::getConnection(void) const
     return connection;
 }
 
-bool LdapConnection::search(LdapSearchScope searchScope, const QString& filter)
+bool LdapConnection::search(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope, const QString& filter)
 {
+    objects.clear();
     if (!bound) {
         return false;
     }
 
-    QString searchBaseDn;
-    if (!connection.subOu.isEmpty()) {
-        searchBaseDn = connection.subOu + ",";
-    }
-    searchBaseDn += connection.baseDn;
+    bool returnValue = true;
     std::unique_ptr<char> ldapSearchBaseDn { strdup(searchBaseDn.toStdString().c_str()) };
     int ldapSearchScope;
     switch (searchScope) {
@@ -107,14 +105,68 @@ bool LdapConnection::search(LdapSearchScope searchScope, const QString& filter)
     timeval timeout;
     timeout.tv_sec = 10;
     timeout.tv_usec = 0;
-    LDAPMessage* ldapMessage = nullptr;
-    if (ldap_search_ext_s(handle, ldapSearchBaseDn.get(), ldapSearchScope, ldapFilter.get(), nullptr, 0, nullptr, nullptr, &timeout, 256, &ldapMessage) != LDAP_SUCCESS) {
+    LDAPMessage* ldapMessages = nullptr;
+    LDAPMessage* ldapMessage;
+    if (ldap_search_ext_s(handle, ldapSearchBaseDn.get(), ldapSearchScope, ldapFilter.get(), nullptr, 0, nullptr, nullptr, &timeout, LDAP_NO_LIMIT, &ldapMessages) != LDAP_SUCCESS) {
         return false;
     }
-    Q_ASSERT(ldapMessage);
-    ldap_msgfree(ldapMessage);
+    Q_ASSERT(ldapMessages);
 
-    return true;
+    LdapObject object;
+    for (ldapMessage = ldap_first_message(handle, ldapMessages); ldapMessage; ldapMessage = ldap_next_message(handle, ldapMessage)) {
+        int ldapMessageType = ldap_msgtype(ldapMessage);
+        switch (ldapMessageType) {
+        case LDAP_RES_SEARCH_ENTRY:
+            retrieveLdapObject(ldapMessage, object);
+            if (object.isValid()) {
+                objects.push_back(object);
+            } else {
+                returnValue = false;
+            }
+            break;
+        case LDAP_RES_SEARCH_RESULT:
+            returnValue = ldap_parse_result(handle, ldapMessage, nullptr, nullptr, nullptr, nullptr, nullptr, 0) == LDAP_SUCCESS ? returnValue : false;
+            break;
+        default:
+            break;
+        }
+    }
+
+    ldap_msgfree(ldapMessages);
+
+    return returnValue;
+}
+
+void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object)
+{
+    object.clear();
+    Q_ASSERT(bound);
+    Q_ASSERT(ldap_msgtype(message) == LDAP_RES_SEARCH_ENTRY);
+
+    char* ldapObjectDn = ldap_get_dn(handle, message);
+    object.setDistinguishedName(ldapObjectDn);
+    ldap_memfree(ldapObjectDn);
+
+    char* ldapAttribute;
+    berval** ldapAttributeValues;
+    BerElement* binaryEncoding = nullptr;
+
+    for (ldapAttribute = ldap_first_attribute(handle, message, &binaryEncoding); ldapAttribute; ldapAttribute = ldap_next_attribute(handle, message, binaryEncoding)) {
+        ldapAttributeValues = ldap_get_values_len(handle, message, ldapAttribute);
+        if (ldapAttributeValues) {
+            LdapAttributeValues values;
+            berval** ldapAttributeValuePointer = ldapAttributeValues;
+
+            for (; ldapAttributeValuePointer && *ldapAttributeValuePointer; ++ldapAttributeValuePointer) {
+                Q_ASSERT((*ldapAttributeValuePointer)->bv_val);
+                values.push_back((*ldapAttributeValuePointer)->bv_val);
+            }
+            ldap_value_free_len(ldapAttributeValues);
+            object.setAttribute(ldapAttribute, values);
+        }
+
+        ldap_memfree(ldapAttribute);
+    }
 }
 
 } /* namespace Flix */

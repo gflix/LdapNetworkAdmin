@@ -10,6 +10,7 @@
 
 #include <ldap.h>
 #include <Common.h>
+#include <LdapObject.h>
 
 namespace Flix {
 
@@ -24,6 +25,8 @@ class LdapConnection {
 
     bool bound;
     Connection connection;
+
+    void retrieveLdapObject(LDAPMessage* message, LdapObject& object);
 public:
     LdapConnection();
     virtual ~LdapConnection();
@@ -34,7 +37,7 @@ public:
     bool isBound(void) const;
     const Connection& getConnection(void) const;
 
-    bool search(LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)"));
+    bool search(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)"));
 };
 
 } /* namespace Flix */

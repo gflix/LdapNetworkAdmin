@@ -19,6 +19,9 @@ namespace Flix {
 MainWindow::MainWindow()
 {
     setWindowTitleWithState();
+
+    networkTree = new ModelNetworkTree(this);
+
     initActions();
     initMenuBar();
     initLayout();
@@ -34,7 +37,15 @@ void MainWindow::showConnectionsDialog(void)
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         Connection connection;
         if (dialog.getConnection(connection)) {
-            connectToLdapServer(connection);
+            if (!connectToLdapServer(connection)) {
+                disconnectFromLdapServer();
+                QMessageBox::critical(this, tr("LDAP server connection"), tr("Could not connect to LDAP server!"));
+            } else {
+                setWindowTitleWithState(connection.name);
+                actionRefresh->setEnabled(true);
+                actionDisconnect->setEnabled(true);
+                emit(connectedToLdapServer());
+            }
         }
     }
 }
@@ -43,6 +54,7 @@ void MainWindow::disconnectFromLdapServer(void)
 {
     ldapConnection.unbind();
     setWindowTitleWithState();
+    actionRefresh->setEnabled(false);
     actionDisconnect->setEnabled(false);
 }
 
@@ -50,6 +62,13 @@ void MainWindow::updateNetworkTree(void)
 {
     if (!ldapConnection.isBound()) {
         return;
+    }
+    qInfo() << "MainWindow::updateNetworkTree()";
+
+    const Connection& connection = ldapConnection.getConnection();
+    LdapObjects objects;
+    if (ldapConnection.search(objects, joinDistinguishedName({connection.baseDn, connection.subOu}), LdapSearchScope::BASE) && objects.size() == 1) {
+        qInfo() << "INFO: Search was successful, entries=" << objects.size();
     }
 }
 
@@ -64,9 +83,16 @@ void MainWindow::initActions(void)
     actionDisconnect->setEnabled(false);
     connect(actionDisconnect, SIGNAL(triggered()), this, SLOT(disconnectFromLdapServer()));
 
+    actionRefresh = new QAction(tr("&Refresh"), this);
+    actionRefresh->setShortcut(Qt::CTRL | Qt::Key_R);
+    actionRefresh->setEnabled(false);
+    connect(actionRefresh, SIGNAL(triggered()), this, SLOT(updateNetworkTree()));
+
     actionQuit = new QAction(tr("&Quit"), this);
     actionQuit->setShortcut(Qt::CTRL | Qt::Key_Q);
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+
+    connect(this, SIGNAL(connectedToLdapServer()), this, SLOT(updateNetworkTree()));
 }
 
 void MainWindow::initMenuBar(void)
@@ -74,15 +100,20 @@ void MainWindow::initMenuBar(void)
     QMenu* menuEntry = menuBar()->addMenu(tr("LdapNetworkAdmin"));
     menuEntry->addAction(actionConnect);
     menuEntry->addAction(actionDisconnect);
+    menuEntry->addAction(actionRefresh);
     menuEntry->addSeparator();
     menuEntry->addAction(actionQuit);
 }
 
 void MainWindow::initLayout(void)
 {
-    QHBoxLayout* layout = new QHBoxLayout();
+    QVBoxLayout* layout = new QVBoxLayout();
 
     layout->addWidget(new QLabel(tr("Network tree")));
+
+    viewNetworkTree = new QTreeView();
+    viewNetworkTree->setModel(networkTree);
+    layout->addWidget(viewNetworkTree);
 
     QWidget* centralWidget = new QWidget();
     centralWidget->setLayout(layout);
@@ -99,11 +130,11 @@ void MainWindow::setWindowTitleWithState(const QString& state)
     }
 }
 
-void MainWindow::connectToLdapServer(const Connection& connection)
+bool MainWindow::connectToLdapServer(const Connection& connection)
 {
     if (connection.host.isEmpty() || connection.baseDn.isEmpty() || connection.authDn.isEmpty()) {
         qWarning() << "WARNING: Insufficient connection details given. Aborting connection request.";
-        return;
+        return false;
     }
     QString authPassword;
     if (connection.savePassword) {
@@ -111,23 +142,11 @@ void MainWindow::connectToLdapServer(const Connection& connection)
     } else {
         DialogPassword dialog { this };
         if (dialog.exec() != QDialog::DialogCode::Accepted) {
-            return;
+            return false;
         }
         authPassword = dialog.getPassword();
     }
-    if (!ldapConnection.bind(connection, authPassword)) {
-        disconnectFromLdapServer();
-        QMessageBox::critical(this, tr("LDAP server connection"), tr("Could not connect to LDAP server!"));
-        return;
-    }
-    setWindowTitleWithState(connection.name);
-    actionDisconnect->setEnabled(true);
-
-    if (ldapConnection.search()) {
-        qInfo() << "INFO: Search was successful";
-    } else {
-        qCritical() << "ERROR: Could not perform search!";
-    }
+    return ldapConnection.bind(connection, authPassword);
 }
 
 } /* namespace Flix */

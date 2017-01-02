@@ -38,6 +38,8 @@ add_executable(
 	src/DialogConnections.cpp
 	src/DialogPassword.cpp
 	src/ModelConnections.cpp
+	src/ModelNetworkTree.cpp
 	src/LdapConnection.cpp
+	src/LdapObject.cpp
 )
 target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml ${LDAP_LIBRARIES})

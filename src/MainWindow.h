@@ -10,8 +10,10 @@
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QTreeView>
 #include <Common.h>
 #include <LdapConnection.h>
+#include <ModelNetworkTree.h>
 
 namespace Flix {
 
@@ -20,7 +22,11 @@ class MainWindow: public QMainWindow {
 
     QAction* actionConnect;
     QAction* actionDisconnect;
+    QAction* actionRefresh;
     QAction* actionQuit;
+
+    QTreeView* viewNetworkTree;
+    ModelNetworkTree* networkTree;
 
     LdapConnection ldapConnection;
 
@@ -29,10 +35,13 @@ class MainWindow: public QMainWindow {
     void initLayout(void);
     void setWindowTitleWithState(const QString& state = QString());
 
-    void connectToLdapServer(const Connection& connection);
+    bool connectToLdapServer(const Connection& connection);
 public:
     MainWindow();
     virtual ~MainWindow();
+
+signals:
+    void connectedToLdapServer(void);
 
 protected slots:
     void updateNetworkTree(void);
