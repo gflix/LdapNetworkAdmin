@@ -14,6 +14,7 @@
 
 namespace Flix {
 
+typedef QList<QString> LdapAttributes;
 typedef QList<QString> LdapAttributeValues;
 
 class LdapObject {
@@ -30,6 +31,7 @@ public:
     bool isValid(void) const;
     const QString& getDistinguishedName(void) const;
     QString getShortName(void) const;
+    LdapAttributes getAttributes(void) const;
     bool hasAttribute(const QString& attribute) const;
     LdapAttributeValues getAttribute(const QString& attribute) const;
 

@@ -58,6 +58,11 @@ QString LdapObject::getShortName(void) const
     return shortenedName;
 }
 
+LdapAttributes LdapObject::getAttributes(void) const
+{
+    return attributes.keys();
+}
+
 bool LdapObject::hasAttribute(const QString& attribute) const
 {
     return attributes.contains(attribute);
