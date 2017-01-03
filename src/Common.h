@@ -51,6 +51,7 @@ public:
     const LdapObject& getObject(void) const;
 
     bool isContainerObject(void) const;
+    bool isOrganizationalUnit(void) const;
 };
 
 

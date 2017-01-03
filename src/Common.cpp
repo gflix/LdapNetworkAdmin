@@ -93,4 +93,10 @@ bool NetworkTreeItem::isContainerObject(void) const
         objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
 }
 
+bool NetworkTreeItem::isOrganizationalUnit(void) const
+{
+    const LdapAttributeValues objectClasses = object.getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
+    return objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
+}
+
 } /* namespace Flix */
