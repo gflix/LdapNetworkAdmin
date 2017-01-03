@@ -59,6 +59,7 @@ public slots:
     void disconnectFromLdapServer(void);
     void addOrganizationalUnit(void);
     void selectNetworkTreeItem(const QModelIndex& index);
+    void deleteNetworkTreeItem(void);
 
 protected slots:
     void updateNetworkTree(void);

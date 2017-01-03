@@ -24,7 +24,6 @@ PanelOrganizationalUnit::~PanelOrganizationalUnit()
 
 void PanelOrganizationalUnit::initLayout(void)
 {
-    qDebug() << "PanelOrganizationalUnit::initLayout()";
     QGridLayout* layout = new QGridLayout();
 
     layout->addWidget(new QLabel(tr("Identifier") + ':'), 0, 0);

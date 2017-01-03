@@ -97,6 +97,11 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
     }
 }
 
+void MainWindow::deleteNetworkTreeItem(void)
+{
+    qDebug() << "MainWindow::deleteNetworkTreeItem()";
+}
+
 void MainWindow::updateNetworkTree(void)
 {
     networkTree->clear();
@@ -205,6 +210,7 @@ void MainWindow::initLayout(void)
 
     panelDefault = new PanelDefault();
     panelOrganizationalUnit = new PanelOrganizationalUnit();
+    connect(panelOrganizationalUnit, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
 
     stackedPanels = new QStackedWidget();
     stackedPanels->addWidget(panelDefault);

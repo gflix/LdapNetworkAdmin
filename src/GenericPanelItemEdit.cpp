@@ -24,8 +24,6 @@ GenericPanelItemEdit::~GenericPanelItemEdit()
 
 void GenericPanelItemEdit::initLayout(void)
 {
-    qDebug() << "GenericPanelItemEdit::initLayout()";
-
     QVBoxLayout* layout = new QVBoxLayout();
 
     mainContent = new QWidget();
@@ -33,11 +31,17 @@ void GenericPanelItemEdit::initLayout(void)
 
     QHBoxLayout* layoutButtons = new QHBoxLayout();
     buttonDelete = new QPushButton(tr("Delete"));
+    connect(buttonDelete, SIGNAL(clicked()), this, SLOT(clickedDelete()));
     layoutButtons->addWidget(buttonDelete);
 
     layout->addLayout(layoutButtons);
 
     setLayout(layout);
+}
+
+void GenericPanelItemEdit::clickedDelete(void)
+{
+    emit triggeredDelete();
 }
 
 } /* namespace Flix */

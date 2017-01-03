@@ -14,9 +14,14 @@
 namespace Flix {
 
 class GenericPanelItemEdit: public QGroupBox {
+    Q_OBJECT
+
 public:
     GenericPanelItemEdit(const QString& title, QWidget* parent = 0);
     virtual ~GenericPanelItemEdit();
+
+signals:
+    void triggeredDelete(void);
 
 protected:
     QWidget* mainContent;
@@ -24,6 +29,10 @@ private:
     QPushButton* buttonDelete;
 
     virtual void initLayout(void);
+
+protected slots:
+    void clickedDelete(void);
+
 };
 
 } /* namespace Flix */
