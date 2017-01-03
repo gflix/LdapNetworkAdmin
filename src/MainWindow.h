@@ -10,10 +10,13 @@
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QTreeView>
 #include <Common.h>
 #include <LdapConnection.h>
 #include <ModelNetworkTree.h>
+#include <PanelDefault.h>
+#include <PanelOrganizationalUnit.h>
 
 namespace Flix {
 
@@ -30,12 +33,18 @@ class MainWindow: public QMainWindow {
     QTreeView* viewNetworkTree;
     ModelNetworkTree* networkTree;
 
+    PanelDefault *panelDefault;
+    PanelOrganizationalUnit *panelOrganizationalUnit;
+
+    QStackedWidget* stackedPanels;
+
     LdapConnection ldapConnection;
 
     void initActions(void);
     void initMenuBar(void);
     void initLayout(void);
     void setWindowTitleWithState(const QString& state = QString());
+    void setupPanelOrganizationalUnit(const LdapObject& object);
 
     bool connectToLdapServer(const Connection& connection);
 public:
@@ -45,15 +54,16 @@ public:
 signals:
     void connectedToLdapServer(void);
 
-protected slots:
-    void updateNetworkTree(void);
-    void networkTreeCollapsed(const QModelIndex& index);
-    void networkTreeExpanded(const QModelIndex& index);
-
 public slots:
     void showConnectionsDialog(void);
     void disconnectFromLdapServer(void);
     void addOrganizationalUnit(void);
+    void selectNetworkTreeItem(const QModelIndex& index);
+
+protected slots:
+    void updateNetworkTree(void);
+    void networkTreeCollapsed(const QModelIndex& index);
+    void networkTreeExpanded(const QModelIndex& index);
 };
 
 } /* namespace Flix */

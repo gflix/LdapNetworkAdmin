@@ -35,6 +35,9 @@ add_executable(
 	src/LdapNetworkAdmin.cpp
 	src/Common.cpp
 	src/MainWindow.cpp
+	src/GenericPanelItemEdit.cpp
+	src/PanelDefault.cpp
+	src/PanelOrganizationalUnit.cpp
 	src/DialogConnections.cpp
 	src/DialogPassword.cpp
 	src/DialogTextInput.cpp

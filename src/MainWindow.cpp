@@ -6,6 +6,7 @@
  */
 
 #include <QtCore/QDebug>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenuBar>
@@ -14,6 +15,7 @@
 #include <DialogConnections.h>
 #include <DialogPassword.h>
 #include <DialogTextInput.h>
+#include <LdapTags.h>
 
 namespace Flix {
 
@@ -74,6 +76,24 @@ void MainWindow::addOrganizationalUnit(void)
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
         }
+    }
+}
+
+void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+    NetworkTreeItem* item = networkTree->getItem(index);
+    if (!item) {
+        return;
+    }
+
+    if (item->isOrganizationalUnit()) {
+        setupPanelOrganizationalUnit(item->getObject());
+        stackedPanels->setCurrentWidget(panelOrganizationalUnit);
+    } else {
+        stackedPanels->setCurrentWidget(panelDefault);
     }
 }
 
@@ -153,7 +173,7 @@ void MainWindow::initMenuBar(void)
     menuEntry->addAction(actionRefresh);
     menuEntry->addSeparator();
 
-    QMenu* subMenu = new QMenu(tr("&Add"));
+    QMenu* subMenu = new QMenu(tr("&New"));
     subMenu->addAction(actionAddOrganizationalUnit);
     menuEntry->addMenu(subMenu);
 
@@ -163,24 +183,34 @@ void MainWindow::initMenuBar(void)
 
 void MainWindow::initLayout(void)
 {
-    QVBoxLayout* layout = new QVBoxLayout();
+    QGridLayout* layout = new QGridLayout();
 
-    layout->addWidget(new QLabel(tr("Network tree")));
+    layout->addWidget(new QLabel(tr("Network tree")), 0, 0);
 
     viewNetworkTree = new QTreeView();
     viewNetworkTree->setHeaderHidden(true);
     viewNetworkTree->setModel(networkTree);
     connect(viewNetworkTree, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(networkTreeCollapsed(const QModelIndex&)));
     connect(viewNetworkTree, SIGNAL(expanded(const QModelIndex&)), this, SLOT(networkTreeExpanded(const QModelIndex&)));
-    layout->addWidget(viewNetworkTree);
+    connect(viewNetworkTree, SIGNAL(clicked(const QModelIndex&)), this, SLOT(selectNetworkTreeItem(const QModelIndex&)));
+    layout->addWidget(viewNetworkTree, 1, 0);
 
     QHBoxLayout* layoutButtons = new QHBoxLayout();
-    QPushButton* button = new QPushButton(tr("Add"));
+    QPushButton* button = new QPushButton(tr("New"));
     QMenu* subMenu = new QMenu();
     subMenu->addAction(actionAddOrganizationalUnit);
     button->setMenu(subMenu);
     layoutButtons->addWidget(button);
-    layout->addLayout(layoutButtons);
+    layout->addLayout(layoutButtons, 2, 0);
+
+    panelDefault = new PanelDefault();
+    panelOrganizationalUnit = new PanelOrganizationalUnit();
+
+    stackedPanels = new QStackedWidget();
+    stackedPanels->addWidget(panelDefault);
+    stackedPanels->addWidget(panelOrganizationalUnit);
+
+    layout->addWidget(stackedPanels, 0, 1, 3, 1);
 
     QWidget* centralWidget = new QWidget();
     centralWidget->setLayout(layout);
@@ -194,6 +224,16 @@ void MainWindow::setWindowTitleWithState(const QString& state)
         setWindowTitle(baseTitle);
     } else {
         setWindowTitle(QString("%1 (%2)").arg(baseTitle).arg(state));
+    }
+}
+
+void MainWindow::setupPanelOrganizationalUnit(const LdapObject& object)
+{
+    const LdapAttributeValues& values = object.getAttribute(LDAP_ATTRIBUTE_ORGANIZATIONAL_UNIT);
+    if (values.empty()) {
+        panelOrganizationalUnit->setOrganizationalUnit(QString());
+    } else {
+        panelOrganizationalUnit->setOrganizationalUnit(values[0]);
     }
 }
 
