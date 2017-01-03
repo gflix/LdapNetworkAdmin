@@ -86,17 +86,14 @@ bool LdapConnection::addObject(const LdapObject& object) const
         return false;
     }
 
-    LDAPMod attributeObjectClass;
-    LDAPMod* attributes[] = { &attributeObjectClass, nullptr };
+    std::unique_ptr<char> distinguishedName { ldap_strdup(object.getDistinguishedName().toStdString().c_str()) };
+    LDAPMod** ldapAttributes = generateLdapAttributes(object, LdapAttributeOperation::ADD);
 
-    attributeObjectClass.mod_op = 0;
-    attributeObjectClass.mod_type = strdup("objectClass");
-    char* objectClassValues[] = { strdup("top"), strdup("organizationalUnit"), nullptr };
-    attributeObjectClass.mod_values = objectClassValues;
+    bool returnValue = ldap_add_ext_s(handle, distinguishedName.get(), ldapAttributes, nullptr, nullptr) == LDAP_SUCCESS;
 
-    std::unique_ptr<char> distinguishedName { strdup(object.getDistinguishedName().toStdString().c_str()) };
+    freeLdapAttributes(ldapAttributes);
 
-    return ldap_add_ext_s(handle, distinguishedName.get(), attributes, nullptr, nullptr) == LDAP_SUCCESS;
+    return returnValue;
 }
 
 bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope, const QString& filter) const
@@ -186,6 +183,64 @@ void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object
 
         ldap_memfree(ldapAttribute);
     }
+}
+
+LDAPMod** LdapConnection::generateLdapAttributes(const LdapObject& object, LdapAttributeOperation operation) const
+{
+    int ldapAttributeOperation;
+
+    switch (operation) {
+    case LdapAttributeOperation::MODIFY:
+        ldapAttributeOperation = LDAP_MOD_REPLACE;
+        break;
+    default:
+        ldapAttributeOperation = LDAP_MOD_ADD;
+        break;
+    }
+
+    LdapAttributes attributes = object.getAttributes();
+    size_t ldapAttributesSize = (attributes.size() + 1) * sizeof(LDAPMod*);
+    LDAPMod** ldapAttributes = (LDAPMod**) ldap_memalloc(ldapAttributesSize);
+
+    bzero(ldapAttributes, ldapAttributesSize);
+    LDAPMod** ldapAttributesPointer = ldapAttributes;
+
+    for (auto& attribute: attributes) {
+        LDAPMod* ldapAttribute = (LDAPMod*) ldap_memalloc(sizeof(LDAPMod));
+        ldapAttribute->mod_op = ldapAttributeOperation;
+        ldapAttribute->mod_type = ldap_strdup(attribute.toStdString().c_str());
+
+        LdapAttributeValues attributeValues = object.getAttribute(attribute);
+        size_t ldapAttributeValuesSize = (attributeValues.size() + 1) * sizeof(char*);
+        ldapAttribute->mod_values = (char**) ldap_memalloc(ldapAttributeValuesSize);
+
+        bzero(ldapAttribute->mod_values, ldapAttributeValuesSize);
+        char** ldapAttributesValuesPointer = ldapAttribute->mod_values;
+
+        for (auto& attributeValue: attributeValues) {
+            *ldapAttributesValuesPointer = ldap_strdup(attributeValue.toStdString().c_str());
+            ++ldapAttributesValuesPointer;
+        }
+
+        *ldapAttributesPointer = ldapAttribute;
+        ++ldapAttributesPointer;
+    }
+
+    return ldapAttributes;
+}
+
+void LdapConnection::freeLdapAttributes(LDAPMod** attributes) const
+{
+    if (!attributes) {
+        return;
+    }
+    LDAPMod** ldapAttributesPointer = attributes;
+    while (*ldapAttributesPointer) {
+        if ((*ldapAttributesPointer)->mod_type) ldap_memfree((*ldapAttributesPointer)->mod_type);
+        if ((*ldapAttributesPointer)->mod_values) ldap_memvfree((void**) (*ldapAttributesPointer)->mod_values);
+        ++ldapAttributesPointer;
+    }
+    ldap_memvfree((void**) attributes);
 }
 
 } /* namespace Flix */

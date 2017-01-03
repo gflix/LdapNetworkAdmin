@@ -20,6 +20,11 @@ enum class LdapSearchScope {
     SUBTREE
 };
 
+enum class LdapAttributeOperation {
+    ADD,
+    MODIFY,
+};
+
 class LdapConnection {
     LDAP* handle;
 
@@ -27,6 +32,8 @@ class LdapConnection {
     Connection connection;
 
     void retrieveLdapObject(LDAPMessage* message, LdapObject& object) const;
+    LDAPMod** generateLdapAttributes(const LdapObject& object, LdapAttributeOperation operation) const;
+    void freeLdapAttributes(LDAPMod** attributes) const;
 public:
     LdapConnection();
     virtual ~LdapConnection();
