@@ -35,6 +35,9 @@ public:
     bool hasAttribute(const QString& attribute) const;
     LdapAttributeValues getAttribute(const QString& attribute) const;
 
+    bool isDcObject(void) const;
+    bool isOrganizationalUnit(void) const;
+
     static LdapObject createOrganizationalUnit(const QString& distinguishedName);
 };
 

@@ -76,6 +76,16 @@ LdapAttributeValues LdapObject::getAttribute(const QString& attribute) const
     return attributes[attribute];
 }
 
+bool LdapObject::isDcObject(void) const
+{
+    return getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS).contains(LDAP_OBJECT_CLASS_DC_OBJECT);
+}
+
+bool LdapObject::isOrganizationalUnit(void) const
+{
+    return getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS).contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
+}
+
 LdapObject LdapObject::createOrganizationalUnit(const QString& distinguishedName)
 {
     LdapObject object;

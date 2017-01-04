@@ -65,14 +65,14 @@ void MainWindow::disconnectFromLdapServer(void)
 void MainWindow::addOrganizationalUnit(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
-    NetworkTreeItem* item = networkTree->getItem(index);
-    if (!ldapConnection.isBound() || !index.isValid() || !item->isContainerObject()) {
+    const LdapObject& object = networkTree->getItem(index)->getObject();
+    if (!ldapConnection.isBound() || !index.isValid() || (!object.isDcObject() && !object.isOrganizationalUnit())) {
         return;
     }
 
     DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
-        LdapObject object = LdapObject::createOrganizationalUnit(joinDistinguishedName({ item->getObject().getDistinguishedName(), "ou=" + dialog.getTextInput() }));
+        LdapObject object = LdapObject::createOrganizationalUnit(joinDistinguishedName({ object.getDistinguishedName(), "ou=" + dialog.getTextInput() }));
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
         }
@@ -84,13 +84,10 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
     if (!index.isValid()) {
         return;
     }
-    NetworkTreeItem* item = networkTree->getItem(index);
-    if (!item) {
-        return;
-    }
+    const LdapObject& object = networkTree->getItem(index)->getObject();
 
-    if (item->isOrganizationalUnit()) {
-        setupPanelOrganizationalUnit(item->getObject());
+    if (object.isOrganizationalUnit()) {
+        setupPanelOrganizationalUnit(object);
         stackedPanels->setCurrentWidget(panelOrganizationalUnit);
     } else {
         stackedPanels->setCurrentWidget(panelDefault);

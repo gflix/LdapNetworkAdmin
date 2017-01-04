@@ -6,7 +6,6 @@
  */
 
 #include <ModelNetworkTree.h>
-#include <LdapTags.h>
 
 namespace Flix {
 
@@ -95,7 +94,8 @@ bool ModelNetworkTree::hasChildren(const QModelIndex& parent) const
     if (item == root) {
         return true;
     }
-    return item->isContainerObject();
+    const LdapObject& object = item->getObject();
+    return object.isDcObject() || object.isOrganizationalUnit();
 }
 
 bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &parent)
