@@ -140,6 +140,7 @@ void MainWindow::updateOrganizationalUnit(void)
 void MainWindow::updateNetworkTree(void)
 {
     networkTree->clear();
+    stackedPanels->setCurrentWidget(panelDefault);
     if (!ldapConnection.isBound()) {
         return;
     }
