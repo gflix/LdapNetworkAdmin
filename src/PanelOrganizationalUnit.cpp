@@ -30,6 +30,8 @@ void PanelOrganizationalUnit::initLayout(void)
     editOrganizationalUnit = new QLineEdit();
     layout->addWidget(editOrganizationalUnit, 0, 1);
 
+    layout->setRowStretch(1, 1);
+
     mainContent->setLayout(layout);
 }
 

@@ -13,6 +13,8 @@
 namespace Flix {
 
 class PanelDefault: public QGroupBox {
+    Q_OBJECT
+
     void initLayout(void);
 public:
     PanelDefault(QWidget* parent = 0);

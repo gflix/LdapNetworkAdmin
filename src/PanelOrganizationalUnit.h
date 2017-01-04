@@ -14,6 +14,8 @@
 namespace Flix {
 
 class PanelOrganizationalUnit: public GenericPanelItemEdit {
+    Q_OBJECT
+
 public:
     PanelOrganizationalUnit(QWidget* parent = 0);
     virtual ~PanelOrganizationalUnit();

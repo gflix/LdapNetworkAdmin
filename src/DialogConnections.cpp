@@ -162,6 +162,7 @@ void DialogConnections::initLayout(void)
     layout->addWidget(viewConnections, 1, 0, lineIndex - 1, 1);
 
     QHBoxLayout* layoutConnectionModificationButtons = new QHBoxLayout();
+    layoutConnectionModificationButtons->addStretch();
     buttonNewConnection = new QPushButton(tr("New"));
     connect(buttonNewConnection, SIGNAL(clicked()), this, SLOT(newConnection()));
     layoutConnectionModificationButtons->addWidget(buttonNewConnection);
@@ -175,6 +176,7 @@ void DialogConnections::initLayout(void)
     layout->addLayout(layoutConnectionModificationButtons, lineIndex, 0);
 
     QHBoxLayout* layoutDialogButtons = new QHBoxLayout();
+    layoutDialogButtons->addStretch();
     buttonConnect = new QPushButton(tr("Connect"));
     connect(buttonConnect, SIGNAL(clicked()), this, SLOT(accept()));
     layoutDialogButtons->addWidget(buttonConnect);

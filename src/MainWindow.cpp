@@ -215,6 +215,7 @@ void MainWindow::initLayout(void)
     subMenu->addAction(actionAddOrganizationalUnit);
     button->setMenu(subMenu);
     layoutButtons->addWidget(button);
+    layoutButtons->addStretch();
     layout->addLayout(layoutButtons, 2, 0);
 
     panelDefault = new PanelDefault();
