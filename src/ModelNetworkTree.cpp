@@ -12,7 +12,7 @@ namespace Flix {
 ModelNetworkTree::ModelNetworkTree(QObject *parent):
     QAbstractItemModel(parent)
 {
-    root = new NetworkTreeItem(LdapObject());
+    root = new NetworkTreeItem(nullptr);
 }
 
 ModelNetworkTree::~ModelNetworkTree()
@@ -41,7 +41,7 @@ QVariant ModelNetworkTree::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::DisplayRole) {
-        return item->getObject().getIdentifier();
+        return item->getObject()->getIdentifier();
     }
     return QVariant();
 }
@@ -94,11 +94,11 @@ bool ModelNetworkTree::hasChildren(const QModelIndex& parent) const
     if (item == root) {
         return true;
     }
-    const LdapObject& object = item->getObject();
-    return object.isDcObject() || object.isOrganizationalUnit();
+    const GenericLdapObject* object = item->getObject();
+    return object->isObjectType(LdapObjectType::DC_OBJECT) || object->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT);
 }
 
-bool ModelNetworkTree::addChild(const LdapObject& object, const QModelIndex &parent)
+bool ModelNetworkTree::addChild(const GenericLdapObject* object, const QModelIndex &parent)
 {
     NetworkTreeItem* item = getItem(parent);
     if (!item) {
@@ -123,7 +123,7 @@ void ModelNetworkTree::deleteTree(const QModelIndex& parent)
     }
 }
 
-void ModelNetworkTree::updateItem(const QModelIndex& index, const LdapObject& object)
+void ModelNetworkTree::updateItem(const GenericLdapObject* object, const QModelIndex& index)
 {
     NetworkTreeItem* item = getItem(index);
     if (!item) {

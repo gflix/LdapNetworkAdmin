@@ -32,7 +32,7 @@ QString joinDistinguishedName(const LdapDistinguishedNameParts& parts)
     return distinguishedName;
 }
 
-NetworkTreeItem::NetworkTreeItem(const LdapObject& object, NetworkTreeItem* parent):
+NetworkTreeItem::NetworkTreeItem(const GenericLdapObject* object, NetworkTreeItem* parent):
     parent(parent),
     object(object)
 {
@@ -41,6 +41,9 @@ NetworkTreeItem::NetworkTreeItem(const LdapObject& object, NetworkTreeItem* pare
 NetworkTreeItem::~NetworkTreeItem(void)
 {
     clearChildren();
+    if (object) {
+        delete object;
+    }
 }
 
 void NetworkTreeItem::clearChildren(void)
@@ -49,12 +52,12 @@ void NetworkTreeItem::clearChildren(void)
     children.clear();
 }
 
-void NetworkTreeItem::addChild(const LdapObject& object)
+void NetworkTreeItem::addChild(const GenericLdapObject* object)
 {
     children.push_back(new NetworkTreeItem(object, this));
 }
 
-void NetworkTreeItem::setObject(const LdapObject& object)
+void NetworkTreeItem::setObject(const GenericLdapObject* object)
 {
     this->object = object;
 }
@@ -84,7 +87,7 @@ NetworkTreeItem* NetworkTreeItem::getParent(void) const
     return parent;
 }
 
-const LdapObject& NetworkTreeItem::getObject(void) const
+const GenericLdapObject* NetworkTreeItem::getObject(void) const
 {
     return object;
 }

@@ -8,6 +8,10 @@
 #include <memory>
 #include <QtCore/QDebug>
 #include <LdapConnection.h>
+#include <LdapObjectDcObject.h>
+#include <LdapObjectOrganizationalUnit.h>
+#include <LdapObjectNetworkHost.h>
+#include <LdapTags.h>
 
 namespace Flix {
 
@@ -80,14 +84,18 @@ const Connection& LdapConnection::getConnection(void) const
     return connection;
 }
 
-bool LdapConnection::addObject(const LdapObject& object) const
+bool LdapConnection::addObject(const GenericLdapObject* object) const
 {
-    if (!bound || !object.isValid()) {
+    if (!bound || !object || !object->isValid()) {
         return false;
     }
 
-    std::unique_ptr<char> distinguishedName { ldap_strdup(object.getDistinguishedName().toStdString().c_str()) };
+    std::unique_ptr<char> distinguishedName { ldap_strdup(object->getDistinguishedName().toStdString().c_str()) };
+
     LDAPMod** ldapAttributes = generateLdapAttributes(object, LdapAttributeOperation::ADD);
+    if (!ldapAttributes) {
+        return false;
+    }
 
     bool returnValue = ldap_add_ext_s(handle, distinguishedName.get(), ldapAttributes, nullptr, nullptr) == LDAP_SUCCESS;
 
@@ -128,13 +136,13 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
     }
     Q_ASSERT(ldapMessages);
 
-    LdapObject object;
     for (ldapMessage = ldap_first_message(handle, ldapMessages); ldapMessage; ldapMessage = ldap_next_message(handle, ldapMessage)) {
+        GenericLdapObject* object = nullptr;
         int ldapMessageType = ldap_msgtype(ldapMessage);
         switch (ldapMessageType) {
         case LDAP_RES_SEARCH_ENTRY:
-            retrieveLdapObject(ldapMessage, object);
-            if (object.isValid()) {
+            retrieveLdapObject(ldapMessage, &object);
+            if (object && object->isValid()) {
                 objects.push_back(object);
             } else {
                 returnValue = false;
@@ -153,20 +161,20 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
     return returnValue;
 }
 
-bool LdapConnection::deleteObject(const LdapObject& object) const
+bool LdapConnection::deleteObject(const GenericLdapObject* object) const
 {
-    if (!bound || !object.isValid()) {
+    if (!bound || !object || !object->isValid()) {
         return false;
     }
 
-    std::unique_ptr<char> distinguishedName { ldap_strdup(object.getDistinguishedName().toStdString().c_str()) };
+    std::unique_ptr<char> distinguishedName { ldap_strdup(object->getDistinguishedName().toStdString().c_str()) };
 
     return ldap_delete_ext_s(handle, distinguishedName.get(), nullptr, nullptr) == LDAP_SUCCESS;
 }
 
-bool LdapConnection::renameObject(LdapObject& object, const QString& newIdentifier) const
+bool LdapConnection::renameObject(GenericLdapObject** object, const QString& newIdentifier) const
 {
-    if (!bound || !object.isValid()) {
+    if (!bound || !object || !(*object) || !(*object)->isValid()) {
         return false;
     }
     QRegExp regexIdentifier { R"re(^[\w\.-]+$)re" };
@@ -174,11 +182,11 @@ bool LdapConnection::renameObject(LdapObject& object, const QString& newIdentifi
         return false;
     }
     QRegExp regexDistinguishedNameParts { R"re(^(\w+=)([\w\.-]+)(,.+)$)re" };
-    if (!regexDistinguishedNameParts.exactMatch(object.getDistinguishedName())) {
+    if (!regexDistinguishedNameParts.exactMatch((*object)->getDistinguishedName())) {
         return false;
     }
 
-    std::unique_ptr<char> ldapDistinguishedName { strdup(object.getDistinguishedName().toStdString().c_str()) };
+    std::unique_ptr<char> ldapDistinguishedName { strdup((*object)->getDistinguishedName().toStdString().c_str()) };
     QString newRelativeDistinguishedName { regexDistinguishedNameParts.cap(1) + newIdentifier };
     std::unique_ptr<char> ldapNewRelativeDistinguishedName { strdup(newRelativeDistinguishedName.toStdString().c_str()) };
 
@@ -195,23 +203,30 @@ bool LdapConnection::renameObject(LdapObject& object, const QString& newIdentifi
     if (objects.empty()) {
         return false;
     }
-    object = objects[0];
+    if (object) {
+        delete *object;
+    }
+    *object = GenericLdapObject::getDuplicate(objects[0]);
     return true;
 }
 
-void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object) const
+void LdapConnection::retrieveLdapObject(LDAPMessage* message, GenericLdapObject** object) const
 {
-    object.clear();
     Q_ASSERT(bound);
     Q_ASSERT(ldap_msgtype(message) == LDAP_RES_SEARCH_ENTRY);
 
+    if (!object) {
+        return;
+    }
+
     char* ldapObjectDn = ldap_get_dn(handle, message);
-    object.setDistinguishedName(ldapObjectDn);
+    QString distinguishedName { ldapObjectDn };
     ldap_memfree(ldapObjectDn);
 
     char* ldapAttribute;
     berval** ldapAttributeValues;
     BerElement* binaryEncoding = nullptr;
+    QMap<QString, LdapAttributeValues> attributes;
 
     for (ldapAttribute = ldap_first_attribute(handle, message, &binaryEncoding); ldapAttribute; ldapAttribute = ldap_next_attribute(handle, message, binaryEncoding)) {
         ldapAttributeValues = ldap_get_values_len(handle, message, ldapAttribute);
@@ -224,15 +239,35 @@ void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object
                 values.push_back((*ldapAttributeValuePointer)->bv_val);
             }
             ldap_value_free_len(ldapAttributeValues);
-            object.setAttribute(ldapAttribute, values);
+            attributes[QString(ldapAttribute)] = values;
         }
 
         ldap_memfree(ldapAttribute);
     }
+
+    const LdapAttributeValues& objectClasses = attributes[LDAP_ATTRIBUTE_OBJECT_CLASS];
+    *object = nullptr;
+    if (objectClasses.contains(LDAP_OBJECT_CLASS_DEVICE) && objectClasses.contains(LDAP_OBJECT_CLASS_IP_HOST)) {
+        *object = new LdapObjectNetworkHost();
+    } else if (objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT)) {
+        *object = new LdapObjectOrganizationalUnit();
+    } else if (objectClasses.contains(LDAP_OBJECT_CLASS_DC_OBJECT)) {
+        *object = new LdapObjectDcObject();
+    }
+    if (!(*object)) {
+        return;
+    }
+    (*object)->setDistinguishedName(distinguishedName);
+    for (auto attribute: attributes.keys()) {
+        (*object)->setAttribute(attribute, attributes[attribute]);
+    }
 }
 
-LDAPMod** LdapConnection::generateLdapAttributes(const LdapObject& object, LdapAttributeOperation operation) const
+LDAPMod** LdapConnection::generateLdapAttributes(const GenericLdapObject* object, LdapAttributeOperation operation) const
 {
+    if (!object) {
+        return nullptr;
+    }
     int ldapAttributeOperation;
 
     switch (operation) {
@@ -244,7 +279,7 @@ LDAPMod** LdapConnection::generateLdapAttributes(const LdapObject& object, LdapA
         break;
     }
 
-    LdapAttributes attributes = object.getAttributes();
+    LdapAttributes attributes = object->getAttributes();
     size_t ldapAttributesSize = (attributes.size() + 1) * sizeof(LDAPMod*);
     LDAPMod** ldapAttributes = (LDAPMod**) ldap_memalloc(ldapAttributesSize);
 
@@ -256,7 +291,7 @@ LDAPMod** LdapConnection::generateLdapAttributes(const LdapObject& object, LdapA
         ldapAttribute->mod_op = ldapAttributeOperation;
         ldapAttribute->mod_type = ldap_strdup(attribute.toStdString().c_str());
 
-        LdapAttributeValues attributeValues = object.getAttribute(attribute);
+        LdapAttributeValues attributeValues = object->getAttribute(attribute);
         size_t ldapAttributeValuesSize = (attributeValues.size() + 1) * sizeof(char*);
         ldapAttribute->mod_values = (char**) ldap_memalloc(ldapAttributeValuesSize);
 

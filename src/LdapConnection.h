@@ -10,7 +10,7 @@
 
 #include <ldap.h>
 #include <Common.h>
-#include <LdapObject.h>
+#include <GenericLdapObject.h>
 
 namespace Flix {
 
@@ -31,8 +31,8 @@ class LdapConnection {
     bool bound;
     Connection connection;
 
-    void retrieveLdapObject(LDAPMessage* message, LdapObject& object) const;
-    LDAPMod** generateLdapAttributes(const LdapObject& object, LdapAttributeOperation operation) const;
+    void retrieveLdapObject(LDAPMessage* message, GenericLdapObject** object) const;
+    LDAPMod** generateLdapAttributes(const GenericLdapObject* object, LdapAttributeOperation operation) const;
     void freeLdapAttributes(LDAPMod** attributes) const;
 public:
     LdapConnection();
@@ -44,10 +44,10 @@ public:
     bool isBound(void) const;
     const Connection& getConnection(void) const;
 
-    bool addObject(const LdapObject& object) const;
+    bool addObject(const GenericLdapObject* object) const;
     bool searchObjects(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)")) const;
-    bool deleteObject(const LdapObject& object) const;
-    bool renameObject(LdapObject& object, const QString& newIdentifier) const;
+    bool deleteObject(const GenericLdapObject* object) const;
+    bool renameObject(GenericLdapObject** object, const QString& newIdentifier) const;
 };
 
 } /* namespace Flix */

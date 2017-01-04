@@ -15,6 +15,8 @@
 #include <DialogConnections.h>
 #include <DialogPassword.h>
 #include <DialogTextInput.h>
+#include <LdapObjectOrganizationalUnit.h>
+#include <LdapObjectNetworkHost.h>
 #include <LdapTags.h>
 
 namespace Flix {
@@ -65,16 +67,16 @@ void MainWindow::disconnectFromLdapServer(void)
 void MainWindow::addOrganizationalUnit(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
-    const LdapObject& parentObject = networkTree->getItem(index)->getObject();
-    if (!ldapConnection.isBound() || !index.isValid() || (!parentObject.isDcObject() && !parentObject.isOrganizationalUnit())) {
+    const GenericLdapObject* parentObject = networkTree->getItem(index)->getObject();
+    if (!ldapConnection.isBound() || !index.isValid() || !parentObject || (!parentObject->isObjectType(LdapObjectType::DC_OBJECT) && !parentObject->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT))) {
         return;
     }
 
     DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         // need to store the result in a separate variable, passing the result as an argument may lead to segfault
-        QString joinedDistinguishedName { joinDistinguishedName({ parentObject.getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
-        LdapObject object = LdapObject::createOrganizationalUnit(joinedDistinguishedName);
+        QString joinedDistinguishedName { joinDistinguishedName({ parentObject->getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
+        GenericLdapObject* object = LdapObjectOrganizationalUnit::create(joinedDistinguishedName);
 
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
@@ -87,16 +89,16 @@ void MainWindow::addOrganizationalUnit(void)
 void MainWindow::addNetworkHost(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
-    const LdapObject& parentObject = networkTree->getItem(index)->getObject();
-    if (!ldapConnection.isBound() || !index.isValid() || (!parentObject.isDcObject() && !parentObject.isOrganizationalUnit())) {
+    const GenericLdapObject* parentObject = networkTree->getItem(index)->getObject();
+    if (!ldapConnection.isBound() || !index.isValid() || !parentObject || (!parentObject->isObjectType(LdapObjectType::DC_OBJECT) && !parentObject->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT))) {
         return;
     }
 
     DialogTextInput dialog { tr("Host name"), tr("Enter the fully qualified host name") + ':', this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         // need to store the result in a separate variable, passing the result as an argument may lead to segfault
-        QString joinedDistinguishedName { joinDistinguishedName({ parentObject.getDistinguishedName(), "cn=" + dialog.getTextInput() }) };
-        LdapObject object = LdapObject::createNetworkHost(joinedDistinguishedName);
+        QString joinedDistinguishedName { joinDistinguishedName({ parentObject->getDistinguishedName(), "cn=" + dialog.getTextInput() }) };
+        GenericLdapObject* object = LdapObjectNetworkHost::create(joinedDistinguishedName, "0.0.0.0");
 
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the host") + '!');
@@ -111,12 +113,12 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
     if (!index.isValid()) {
         return;
     }
-    const LdapObject& object = networkTree->getItem(index)->getObject();
+    const GenericLdapObject* object = networkTree->getItem(index)->getObject();
 
-    if (object.isOrganizationalUnit()) {
+    if (object->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT)) {
         setupPanelOrganizationalUnit(object);
         stackedPanels->setCurrentWidget(panelOrganizationalUnit);
-    } else if (object.isNetworkHost()) {
+    } else if (object->isObjectType(LdapObjectType::NETWORK_HOST)) {
         setupPanelNetworkHost(object);
         stackedPanels->setCurrentWidget(panelNetworkHost);
     } else {
@@ -130,8 +132,8 @@ void MainWindow::deleteNetworkTreeItem(void)
     if (!ldapConnection.isBound() || !index.isValid()) {
         return;
     }
-    const LdapObject& object = networkTree->getItem(index)->getObject();
-    if (QMessageBox::question(this, tr("Confirmation"), tr("Really delete the object \"%1\"?").arg(object.getDistinguishedName())) == QMessageBox::Yes) {
+    const GenericLdapObject* object = networkTree->getItem(index)->getObject();
+    if (QMessageBox::question(this, tr("Confirmation"), tr("Really delete the object \"%1\"?").arg(object->getDistinguishedName())) == QMessageBox::Yes) {
         if (!ldapConnection.deleteObject(object)) {
             QMessageBox::warning(this, tr("Warning"), tr("Object was not deleted."));
         }
@@ -144,10 +146,15 @@ void MainWindow::updateOrganizationalUnit(void)
     if (!ldapConnection.isBound() || !index.isValid()) {
         return;
     }
-    const LdapObject& object = networkTree->getItem(index)->getObject();
-    if (object.getIdentifier() != panelOrganizationalUnit->getOrganizationalUnit()) {
-        LdapObject modifiedObject { object };
-        if (!ldapConnection.renameObject(modifiedObject, panelOrganizationalUnit->getOrganizationalUnit())) {
+    const GenericLdapObject* object = networkTree->getItem(index)->getObject();
+    if (object->getIdentifier() != panelOrganizationalUnit->getOrganizationalUnit()) {
+        GenericLdapObject* modifiedObject = GenericLdapObject::getDuplicate(object);
+        if (!modifiedObject) {
+            QMessageBox::critical(this, tr("Error"), tr("Internal error") + '!');
+            return;
+        }
+
+        if (!ldapConnection.renameObject(&modifiedObject, panelOrganizationalUnit->getOrganizationalUnit())) {
             QMessageBox::critical(this, tr("Error"), tr("Could not rename the LDAP object") + '!');
             return;
         }
@@ -157,7 +164,7 @@ void MainWindow::updateOrganizationalUnit(void)
             emit networkTreeCollapsed(index);
             expandAgain = true;
         }
-        networkTree->updateItem(index, modifiedObject);
+        networkTree->updateItem(modifiedObject, index);
         if (expandAgain) {
             emit networkTreeExpanded(index);
         }
@@ -170,10 +177,15 @@ void MainWindow::updateNetworkHost(void)
     if (!ldapConnection.isBound() || !index.isValid()) {
         return;
     }
-    const LdapObject& object = networkTree->getItem(index)->getObject();
-    if (object.getIdentifier() != panelNetworkHost->getHostName()) {
-        LdapObject modifiedObject { object };
-        if (!ldapConnection.renameObject(modifiedObject, panelNetworkHost->getHostName())) {
+    const GenericLdapObject* object = networkTree->getItem(index)->getObject();
+    if (object->getIdentifier() != panelNetworkHost->getHostName()) {
+        GenericLdapObject* modifiedObject = GenericLdapObject::getDuplicate(object);
+        if (!modifiedObject) {
+            QMessageBox::critical(this, tr("Error"), tr("Internal error") + '!');
+            return;
+        }
+
+        if (!ldapConnection.renameObject(&modifiedObject, panelNetworkHost->getHostName())) {
             QMessageBox::critical(this, tr("Error"), tr("Could not rename the LDAP object") + '!');
             return;
         }
@@ -183,7 +195,7 @@ void MainWindow::updateNetworkHost(void)
             emit networkTreeCollapsed(index);
             expandAgain = true;
         }
-        networkTree->updateItem(index, modifiedObject);
+        networkTree->updateItem(modifiedObject, index);
         if (expandAgain) {
             emit networkTreeExpanded(index);
         }
@@ -217,9 +229,12 @@ void MainWindow::networkTreeExpanded(const QModelIndex& index)
     if (!item) {
         return;
     }
-    const LdapObject& searchBaseObject = item->getObject();
+    const GenericLdapObject* searchBaseObject = item->getObject();
+    if (!searchBaseObject) {
+        return;
+    }
     LdapObjects objects;
-    if (ldapConnection.searchObjects(objects, searchBaseObject.getDistinguishedName(), LdapSearchScope::ONE)) {
+    if (ldapConnection.searchObjects(objects, searchBaseObject->getDistinguishedName(), LdapSearchScope::ONE)) {
         for (auto& object: objects) {
             networkTree->addChild(object, index);
         }
@@ -333,16 +348,22 @@ void MainWindow::setWindowTitleWithState(const QString& state)
     }
 }
 
-void MainWindow::setupPanelOrganizationalUnit(const LdapObject& object)
+void MainWindow::setupPanelOrganizationalUnit(const GenericLdapObject* object)
 {
-    panelOrganizationalUnit->setOrganizationalUnit(object.getIdentifier());
+    if (!object) {
+        return;
+    }
+    panelOrganizationalUnit->setOrganizationalUnit(object->getIdentifier());
 }
 
-void MainWindow::setupPanelNetworkHost(const LdapObject& object)
+void MainWindow::setupPanelNetworkHost(const GenericLdapObject* object)
 {
-    panelNetworkHost->setHostName(object.getIdentifier());
+    if (!object) {
+        return;
+    }
+    panelNetworkHost->setHostName(object->getIdentifier());
 
-    const LdapAttributeValues& values = object.getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
+    const LdapAttributeValues& values = object->getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
     if (!values.empty()) panelNetworkHost->setIpAddress(values[0]);
 }
 

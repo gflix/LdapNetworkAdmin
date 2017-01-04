@@ -50,7 +50,10 @@ add_executable(
 	src/ModelConnections.cpp
 	src/ModelNetworkTree.cpp
 	src/LdapConnection.cpp
-	src/LdapObject.cpp
+	src/GenericLdapObject.cpp
+	src/LdapObjectDcObject.cpp
+	src/LdapObjectOrganizationalUnit.cpp
+	src/LdapObjectNetworkHost.cpp
 	${QM}
 )
 target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml ${LDAP_LIBRARIES})

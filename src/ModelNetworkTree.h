@@ -31,9 +31,9 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     bool hasChildren(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
-    bool addChild(const LdapObject& object, const QModelIndex& parent);
+    bool addChild(const GenericLdapObject* object, const QModelIndex& parent);
     void deleteTree(const QModelIndex& parent);
-    void updateItem(const QModelIndex& index, const LdapObject& object);
+    void updateItem(const GenericLdapObject* object, const QModelIndex& index);
 };
 
 } /* namespace Flix */

@@ -8,9 +8,9 @@
 #ifndef SRC_COMMON_H_
 #define SRC_COMMON_H_
 
+#include <GenericLdapObject.h>
 #include <QtCore/QList>
 #include <QtCore/QString>
-#include <LdapObject.h>
 
 namespace Flix {
 
@@ -36,20 +36,20 @@ class NetworkTreeItem {
     NetworkTreeItem* parent;
     NetworkTreeItems children;
 
-    LdapObject object;
+    const GenericLdapObject* object;
 public:
-    NetworkTreeItem(const LdapObject& object, NetworkTreeItem* parent = nullptr);
+    NetworkTreeItem(const GenericLdapObject* object, NetworkTreeItem* parent = nullptr);
     virtual ~NetworkTreeItem();
 
     void clearChildren(void);
-    void addChild(const LdapObject& object);
-    void setObject(const LdapObject& object);
+    void addChild(const GenericLdapObject* object);
+    void setObject(const GenericLdapObject* object);
 
     NetworkTreeItem* getChild(int number);
     int getChildCount(void) const;
     int getChildNumber(void) const;
     NetworkTreeItem* getParent(void) const;
-    const LdapObject& getObject(void) const;
+    const GenericLdapObject* getObject(void) const;
 };
 
 
