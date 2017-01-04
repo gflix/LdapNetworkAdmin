@@ -72,7 +72,10 @@ void MainWindow::addOrganizationalUnit(void)
 
     DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
-        LdapObject object = LdapObject::createOrganizationalUnit(joinDistinguishedName({ object.getDistinguishedName(), "ou=" + dialog.getTextInput() }));
+        // need to store the result in a separate variable, passing the result as an argument may lead to segfault
+        QString joinedDistinguishedName { joinDistinguishedName({ object.getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
+        LdapObject object = LdapObject::createOrganizationalUnit(joinedDistinguishedName);
+
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
         }
@@ -96,7 +99,16 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
 
 void MainWindow::deleteNetworkTreeItem(void)
 {
-    qDebug() << "MainWindow::deleteNetworkTreeItem()";
+    const QModelIndex& index = viewNetworkTree->currentIndex();
+    if (!index.isValid()) {
+        return;
+    }
+    const LdapObject& object = networkTree->getItem(index)->getObject();
+    if (QMessageBox::question(this, tr("Confirmation"), tr("Really delete the object \"%1\"?").arg(object.getDistinguishedName())) == QMessageBox::Yes) {
+        if (!ldapConnection.deleteObject(object)) {
+            QMessageBox::warning(this, tr("Warning"), tr("Object was not deleted."));
+        }
+    }
 }
 
 void MainWindow::updateNetworkTree(void)
