@@ -80,6 +80,16 @@ void DialogConnections::saveConnection(void)
     }
 }
 
+void DialogConnections::saveAsNewConnection(void)
+{
+    Connection connection;
+    if (!getConnection(connection)) {
+        return;
+    }
+
+    connections->addConnection(connection);
+}
+
 void DialogConnections::deleteConnection(void)
 {
     const QModelIndex& index = viewConnections->currentIndex();
@@ -169,6 +179,9 @@ void DialogConnections::initLayout(void)
     buttonSaveConnection = new QPushButton(tr("Save"));
     connect(buttonSaveConnection, SIGNAL(clicked()), this, SLOT(saveConnection()));
     layoutConnectionModificationButtons->addWidget(buttonSaveConnection);
+    buttonSaveAsNewConnection = new QPushButton(tr("Save as new"));
+    connect(buttonSaveAsNewConnection, SIGNAL(clicked()), this, SLOT(saveAsNewConnection()));
+    layoutConnectionModificationButtons->addWidget(buttonSaveAsNewConnection);
     buttonDeleteConnection = new QPushButton(tr("Delete"));
     connect(buttonDeleteConnection, SIGNAL(clicked()), this, SLOT(deleteConnection()));
     layoutConnectionModificationButtons->addWidget(buttonDeleteConnection);

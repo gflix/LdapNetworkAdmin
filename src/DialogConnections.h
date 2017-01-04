@@ -32,6 +32,7 @@ class DialogConnections: public QDialog {
 
     QPushButton* buttonNewConnection;
     QPushButton* buttonSaveConnection;
+    QPushButton* buttonSaveAsNewConnection;
     QPushButton* buttonDeleteConnection;
     QPushButton* buttonConnect;
     QPushButton* buttonCancel;
@@ -50,6 +51,7 @@ public:
 public slots:
     void newConnection(void);
     void saveConnection(void);
+    void saveAsNewConnection(void);
     void deleteConnection(void);
     void selectConnection(const QModelIndex& index);
     void selectConnectionAndAccept(const QModelIndex& index);
