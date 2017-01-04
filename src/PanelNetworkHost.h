@@ -21,10 +21,13 @@ public:
     virtual ~PanelNetworkHost();
 
     QString getHostName(void) const;
+    QString getIpAddress(void) const;
     void setHostName(const QString& hostName);
+    void setIpAddress(const QString& ipAddress);
 
 private:
     QLineEdit* editHostName;
+    QLineEdit* editIpAddress;
 
     virtual void initLayout(void);
 };

@@ -341,6 +341,9 @@ void MainWindow::setupPanelOrganizationalUnit(const LdapObject& object)
 void MainWindow::setupPanelNetworkHost(const LdapObject& object)
 {
     panelNetworkHost->setHostName(object.getIdentifier());
+
+    const LdapAttributeValues& values = object.getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
+    if (!values.empty()) panelNetworkHost->setIpAddress(values[0]);
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)
