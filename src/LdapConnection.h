@@ -46,6 +46,7 @@ public:
 
     bool addObject(const LdapObject& object) const;
     bool searchObjects(LdapObjects& objects, const QString& searchBaseDn, LdapSearchScope searchScope = LdapSearchScope::BASE, const QString& filter = QString("(objectClass=*)")) const;
+    bool deleteObject(const LdapObject& object) const;
 };
 
 } /* namespace Flix */

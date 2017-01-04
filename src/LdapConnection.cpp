@@ -153,6 +153,17 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
     return returnValue;
 }
 
+bool LdapConnection::deleteObject(const LdapObject& object) const
+{
+    if (!bound && !object.isValid()) {
+        return false;
+    }
+
+    std::unique_ptr<char> distinguishedName { ldap_strdup(object.getDistinguishedName().toStdString().c_str()) };
+
+    return ldap_delete_ext_s(handle, distinguishedName.get(), nullptr, nullptr) == LDAP_SUCCESS;
+}
+
 void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object) const
 {
     object.clear();
