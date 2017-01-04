@@ -17,6 +17,7 @@
 #include <ModelNetworkTree.h>
 #include <PanelDefault.h>
 #include <PanelOrganizationalUnit.h>
+#include <PanelNetworkHost.h>
 
 namespace Flix {
 
@@ -29,12 +30,14 @@ class MainWindow: public QMainWindow {
     QAction* actionQuit;
 
     QAction* actionAddOrganizationalUnit;
+    QAction* actionAddNetworkHost;
 
     QTreeView* viewNetworkTree;
     ModelNetworkTree* networkTree;
 
     PanelDefault *panelDefault;
     PanelOrganizationalUnit *panelOrganizationalUnit;
+    PanelNetworkHost* panelNetworkHost;
 
     QStackedWidget* stackedPanels;
 
@@ -45,6 +48,7 @@ class MainWindow: public QMainWindow {
     void initLayout(void);
     void setWindowTitleWithState(const QString& state = QString());
     void setupPanelOrganizationalUnit(const LdapObject& object);
+    void setupPanelNetworkHost(const LdapObject& object);
 
     bool connectToLdapServer(const Connection& connection);
 public:
@@ -58,9 +62,11 @@ public slots:
     void showConnectionsDialog(void);
     void disconnectFromLdapServer(void);
     void addOrganizationalUnit(void);
+    void addNetworkHost(void);
     void selectNetworkTreeItem(const QModelIndex& index);
     void deleteNetworkTreeItem(void);
     void updateOrganizationalUnit(void);
+    void updateNetworkHost(void);
 
 protected slots:
     void updateNetworkTree(void);

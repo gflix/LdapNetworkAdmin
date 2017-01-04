@@ -82,13 +82,35 @@ bool LdapObject::isOrganizationalUnit(void) const
     return getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS).contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT);
 }
 
+bool LdapObject::isNetworkHost(void) const
+{
+    const LdapAttributeValues& objectClasses = getAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS);
+    return objectClasses.contains(LDAP_OBJECT_CLASS_DEVICE) && objectClasses.contains(LDAP_OBJECT_CLASS_IP_HOST);
+}
+
 LdapObject LdapObject::createOrganizationalUnit(const QString& distinguishedName)
 {
     LdapObject object;
 
     object.setDistinguishedName(distinguishedName);
+
     LdapAttributeValues values { LDAP_OBJECT_CLASS_TOP, LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT };
     object.setAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS, values);
+
+    return object;
+}
+
+LdapObject LdapObject::createNetworkHost(const QString& distinguishedName)
+{
+    LdapObject object;
+
+    object.setDistinguishedName(distinguishedName);
+
+    LdapAttributeValues values { LDAP_OBJECT_CLASS_TOP, LDAP_OBJECT_CLASS_DEVICE, LDAP_OBJECT_CLASS_IP_HOST };
+    object.setAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS, values);
+
+    values = { "0.0.0.0" };
+    object.setAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, values);
 
     return object;
 }

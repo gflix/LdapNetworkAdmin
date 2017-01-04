@@ -65,19 +65,43 @@ void MainWindow::disconnectFromLdapServer(void)
 void MainWindow::addOrganizationalUnit(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
-    const LdapObject& object = networkTree->getItem(index)->getObject();
-    if (!ldapConnection.isBound() || !index.isValid() || (!object.isDcObject() && !object.isOrganizationalUnit())) {
+    const LdapObject& parentObject = networkTree->getItem(index)->getObject();
+    if (!ldapConnection.isBound() || !index.isValid() || (!parentObject.isDcObject() && !parentObject.isOrganizationalUnit())) {
         return;
     }
 
     DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         // need to store the result in a separate variable, passing the result as an argument may lead to segfault
-        QString joinedDistinguishedName { joinDistinguishedName({ object.getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
+        QString joinedDistinguishedName { joinDistinguishedName({ parentObject.getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
         LdapObject object = LdapObject::createOrganizationalUnit(joinedDistinguishedName);
 
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the organizational unit") + '!');
+        } else {
+            networkTree->addChild(object, index);
+        }
+    }
+}
+
+void MainWindow::addNetworkHost(void)
+{
+    const QModelIndex& index = viewNetworkTree->currentIndex();
+    const LdapObject& parentObject = networkTree->getItem(index)->getObject();
+    if (!ldapConnection.isBound() || !index.isValid() || (!parentObject.isDcObject() && !parentObject.isOrganizationalUnit())) {
+        return;
+    }
+
+    DialogTextInput dialog { tr("Host name"), tr("Enter the fully qualified host name") + ':', this };
+    if (dialog.exec() == QDialog::DialogCode::Accepted) {
+        // need to store the result in a separate variable, passing the result as an argument may lead to segfault
+        QString joinedDistinguishedName { joinDistinguishedName({ parentObject.getDistinguishedName(), "cn=" + dialog.getTextInput() }) };
+        LdapObject object = LdapObject::createNetworkHost(joinedDistinguishedName);
+
+        if (!ldapConnection.addObject(object)) {
+            QMessageBox::critical(this, tr("Error"), tr("Could not add the host") + '!');
+        } else {
+            networkTree->addChild(object, index);
         }
     }
 }
@@ -92,6 +116,9 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
     if (object.isOrganizationalUnit()) {
         setupPanelOrganizationalUnit(object);
         stackedPanels->setCurrentWidget(panelOrganizationalUnit);
+    } else if (object.isNetworkHost()) {
+        setupPanelNetworkHost(object);
+        stackedPanels->setCurrentWidget(panelNetworkHost);
     } else {
         stackedPanels->setCurrentWidget(panelDefault);
     }
@@ -137,6 +164,32 @@ void MainWindow::updateOrganizationalUnit(void)
     }
 }
 
+void MainWindow::updateNetworkHost(void)
+{
+    const QModelIndex& index = viewNetworkTree->currentIndex();
+    if (!ldapConnection.isBound() || !index.isValid()) {
+        return;
+    }
+    const LdapObject& object = networkTree->getItem(index)->getObject();
+    if (object.getIdentifier() != panelNetworkHost->getHostName()) {
+        LdapObject modifiedObject { object };
+        if (!ldapConnection.renameObject(modifiedObject, panelNetworkHost->getHostName())) {
+            QMessageBox::critical(this, tr("Error"), tr("Could not rename the LDAP object") + '!');
+            return;
+        }
+
+        bool expandAgain = false;
+        if (viewNetworkTree->isExpanded(index)) {
+            emit networkTreeCollapsed(index);
+            expandAgain = true;
+        }
+        networkTree->updateItem(index, modifiedObject);
+        if (expandAgain) {
+            emit networkTreeExpanded(index);
+        }
+    }
+}
+
 void MainWindow::updateNetworkTree(void)
 {
     networkTree->clear();
@@ -159,6 +212,7 @@ void MainWindow::networkTreeExpanded(const QModelIndex& index)
     if (!index.isValid() || !ldapConnection.isBound()) {
         return;
     }
+    networkTree->deleteTree(index);
     NetworkTreeItem* item = networkTree->getItem(index);
     if (!item) {
         return;
@@ -177,7 +231,6 @@ void MainWindow::networkTreeCollapsed(const QModelIndex& index)
     if (!index.isValid()) {
         return;
     }
-    networkTree->deleteTree(index);
 }
 
 void MainWindow::initActions(void)
@@ -203,6 +256,9 @@ void MainWindow::initActions(void)
     actionAddOrganizationalUnit = new QAction(tr("Organizational &unit"), this);
     connect(actionAddOrganizationalUnit, SIGNAL(triggered()), this, SLOT(addOrganizationalUnit()));
 
+    actionAddNetworkHost = new QAction(tr("Network &host"), this);
+    connect(actionAddNetworkHost, SIGNAL(triggered()), this, SLOT(addNetworkHost()));
+
     connect(this, SIGNAL(connectedToLdapServer()), this, SLOT(updateNetworkTree()));
 }
 
@@ -216,6 +272,7 @@ void MainWindow::initMenuBar(void)
 
     QMenu* subMenu = new QMenu(tr("&New"));
     subMenu->addAction(actionAddOrganizationalUnit);
+    subMenu->addAction(actionAddNetworkHost);
     menuEntry->addMenu(subMenu);
 
     menuEntry->addSeparator();
@@ -240,6 +297,7 @@ void MainWindow::initLayout(void)
     QPushButton* button = new QPushButton(tr("New"));
     QMenu* subMenu = new QMenu();
     subMenu->addAction(actionAddOrganizationalUnit);
+    subMenu->addAction(actionAddNetworkHost);
     button->setMenu(subMenu);
     layoutButtons->addWidget(button);
     layoutButtons->addStretch();
@@ -249,10 +307,14 @@ void MainWindow::initLayout(void)
     panelOrganizationalUnit = new PanelOrganizationalUnit();
     connect(panelOrganizationalUnit, SIGNAL(triggeredSave()), SLOT(updateOrganizationalUnit()));
     connect(panelOrganizationalUnit, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
+    panelNetworkHost = new PanelNetworkHost();
+    connect(panelNetworkHost, SIGNAL(triggeredSave()), SLOT(updateNetworkHost()));
+    connect(panelNetworkHost, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
 
     stackedPanels = new QStackedWidget();
     stackedPanels->addWidget(panelDefault);
     stackedPanels->addWidget(panelOrganizationalUnit);
+    stackedPanels->addWidget(panelNetworkHost);
 
     layout->addWidget(stackedPanels, 0, 1, 3, 1);
 
@@ -274,6 +336,11 @@ void MainWindow::setWindowTitleWithState(const QString& state)
 void MainWindow::setupPanelOrganizationalUnit(const LdapObject& object)
 {
     panelOrganizationalUnit->setOrganizationalUnit(object.getIdentifier());
+}
+
+void MainWindow::setupPanelNetworkHost(const LdapObject& object)
+{
+    panelNetworkHost->setHostName(object.getIdentifier());
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)

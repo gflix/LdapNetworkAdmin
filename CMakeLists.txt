@@ -42,6 +42,7 @@ add_executable(
 	src/MainWindow.cpp
 	src/GenericPanelItemEdit.cpp
 	src/PanelDefault.cpp
+	src/PanelNetworkHost.cpp
 	src/PanelOrganizationalUnit.cpp
 	src/DialogConnections.cpp
 	src/DialogPassword.cpp

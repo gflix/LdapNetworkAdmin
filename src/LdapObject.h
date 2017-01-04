@@ -37,8 +37,10 @@ public:
 
     bool isDcObject(void) const;
     bool isOrganizationalUnit(void) const;
+    bool isNetworkHost(void) const;
 
     static LdapObject createOrganizationalUnit(const QString& distinguishedName);
+    static LdapObject createNetworkHost(const QString& distinguishedName);
 };
 
 typedef QList<LdapObject> LdapObjects;
