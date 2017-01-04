@@ -54,6 +54,11 @@ void NetworkTreeItem::addChild(const LdapObject& object)
     children.push_back(new NetworkTreeItem(object, this));
 }
 
+void NetworkTreeItem::setObject(const LdapObject& object)
+{
+    this->object = object;
+}
+
 NetworkTreeItem* NetworkTreeItem::getChild(int number)
 {
     Q_ASSERT(number >= 0 && number < children.size());

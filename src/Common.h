@@ -43,6 +43,7 @@ public:
 
     void clearChildren(void);
     void addChild(const LdapObject& object);
+    void setObject(const LdapObject& object);
 
     NetworkTreeItem* getChild(int number);
     int getChildCount(void) const;

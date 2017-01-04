@@ -21,16 +21,19 @@ public:
     virtual ~GenericPanelItemEdit();
 
 signals:
+    void triggeredSave(void);
     void triggeredDelete(void);
 
 protected:
     QWidget* mainContent;
 private:
+    QPushButton* buttonSave;
     QPushButton* buttonDelete;
 
     virtual void initLayout(void);
 
 protected slots:
+    void clickedSave(void);
     void clickedDelete(void);
 
 };

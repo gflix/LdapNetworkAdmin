@@ -33,6 +33,7 @@ public:
 
     bool addChild(const LdapObject& object, const QModelIndex& parent);
     void deleteTree(const QModelIndex& parent);
+    void updateItem(const QModelIndex& index, const LdapObject& object);
 };
 
 } /* namespace Flix */

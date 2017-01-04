@@ -30,7 +30,7 @@ public:
 
     bool isValid(void) const;
     const QString& getDistinguishedName(void) const;
-    QString getShortName(void) const;
+    QString getIdentifier(void) const;
     LdapAttributes getAttributes(void) const;
     bool hasAttribute(const QString& attribute) const;
     LdapAttributeValues getAttribute(const QString& attribute) const;

@@ -41,7 +41,7 @@ QVariant ModelNetworkTree::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::DisplayRole) {
-        return item->getObject().getShortName();
+        return item->getObject().getIdentifier();
     }
     return QVariant();
 }
@@ -121,6 +121,16 @@ void ModelNetworkTree::deleteTree(const QModelIndex& parent)
         item->clearChildren();
         endRemoveRows();
     }
+}
+
+void ModelNetworkTree::updateItem(const QModelIndex& index, const LdapObject& object)
+{
+    NetworkTreeItem* item = getItem(index);
+    if (!item) {
+        return;
+    }
+    item->setObject(object);
+    emit dataChanged(index, index);
 }
 
 NetworkTreeItem* ModelNetworkTree::getItem(const QModelIndex& index) const

@@ -100,13 +100,39 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
 void MainWindow::deleteNetworkTreeItem(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
-    if (!index.isValid()) {
+    if (!ldapConnection.isBound() || !index.isValid()) {
         return;
     }
     const LdapObject& object = networkTree->getItem(index)->getObject();
     if (QMessageBox::question(this, tr("Confirmation"), tr("Really delete the object \"%1\"?").arg(object.getDistinguishedName())) == QMessageBox::Yes) {
         if (!ldapConnection.deleteObject(object)) {
             QMessageBox::warning(this, tr("Warning"), tr("Object was not deleted."));
+        }
+    }
+}
+
+void MainWindow::updateOrganizationalUnit(void)
+{
+    const QModelIndex& index = viewNetworkTree->currentIndex();
+    if (!ldapConnection.isBound() || !index.isValid()) {
+        return;
+    }
+    const LdapObject& object = networkTree->getItem(index)->getObject();
+    if (object.getIdentifier() != panelOrganizationalUnit->getOrganizationalUnit()) {
+        LdapObject modifiedObject { object };
+        if (!ldapConnection.renameObject(modifiedObject, panelOrganizationalUnit->getOrganizationalUnit())) {
+            QMessageBox::critical(this, tr("Error"), tr("Could not rename the LDAP object") + '!');
+            return;
+        }
+
+        bool expandAgain = false;
+        if (viewNetworkTree->isExpanded(index)) {
+            emit networkTreeCollapsed(index);
+            expandAgain = true;
+        }
+        networkTree->updateItem(index, modifiedObject);
+        if (expandAgain) {
+            emit networkTreeExpanded(index);
         }
     }
 }
@@ -220,6 +246,7 @@ void MainWindow::initLayout(void)
 
     panelDefault = new PanelDefault();
     panelOrganizationalUnit = new PanelOrganizationalUnit();
+    connect(panelOrganizationalUnit, SIGNAL(triggeredSave()), SLOT(updateOrganizationalUnit()));
     connect(panelOrganizationalUnit, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
 
     stackedPanels = new QStackedWidget();
@@ -245,12 +272,7 @@ void MainWindow::setWindowTitleWithState(const QString& state)
 
 void MainWindow::setupPanelOrganizationalUnit(const LdapObject& object)
 {
-    const LdapAttributeValues& values = object.getAttribute(LDAP_ATTRIBUTE_ORGANIZATIONAL_UNIT);
-    if (values.empty()) {
-        panelOrganizationalUnit->setOrganizationalUnit(QString());
-    } else {
-        panelOrganizationalUnit->setOrganizationalUnit(values[0]);
-    }
+    panelOrganizationalUnit->setOrganizationalUnit(object.getIdentifier());
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)

@@ -82,7 +82,7 @@ const Connection& LdapConnection::getConnection(void) const
 
 bool LdapConnection::addObject(const LdapObject& object) const
 {
-    if (!bound && !object.isValid()) {
+    if (!bound || !object.isValid()) {
         return false;
     }
 
@@ -155,13 +155,48 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
 
 bool LdapConnection::deleteObject(const LdapObject& object) const
 {
-    if (!bound && !object.isValid()) {
+    if (!bound || !object.isValid()) {
         return false;
     }
 
     std::unique_ptr<char> distinguishedName { ldap_strdup(object.getDistinguishedName().toStdString().c_str()) };
 
     return ldap_delete_ext_s(handle, distinguishedName.get(), nullptr, nullptr) == LDAP_SUCCESS;
+}
+
+bool LdapConnection::renameObject(LdapObject& object, const QString& newIdentifier) const
+{
+    if (!bound || !object.isValid()) {
+        return false;
+    }
+    QRegExp regexIdentifier { R"re(^[\w\.-]+$)re" };
+    if (!regexIdentifier.exactMatch(newIdentifier)) {
+        return false;
+    }
+    QRegExp regexDistinguishedNameParts { R"re(^(\w+=)([\w\.-]+)(,.+)$)re" };
+    if (!regexDistinguishedNameParts.exactMatch(object.getDistinguishedName())) {
+        return false;
+    }
+
+    std::unique_ptr<char> ldapDistinguishedName { strdup(object.getDistinguishedName().toStdString().c_str()) };
+    QString newRelativeDistinguishedName { regexDistinguishedNameParts.cap(1) + newIdentifier };
+    std::unique_ptr<char> ldapNewRelativeDistinguishedName { strdup(newRelativeDistinguishedName.toStdString().c_str()) };
+
+    QString newDistinguishedName { regexDistinguishedNameParts.cap(1) + newIdentifier + regexDistinguishedNameParts.cap(3) };
+
+    if (ldap_rename_s(handle, ldapDistinguishedName.get(), ldapNewRelativeDistinguishedName.get(), nullptr, 1, nullptr, nullptr) != LDAP_SUCCESS) {
+        return false;
+    }
+
+    LdapObjects objects;
+    if (!searchObjects(objects, newDistinguishedName, LdapSearchScope::BASE)) {
+        return false;
+    }
+    if (objects.empty()) {
+        return false;
+    }
+    object = objects[0];
+    return true;
 }
 
 void LdapConnection::retrieveLdapObject(LDAPMessage* message, LdapObject& object) const

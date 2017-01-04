@@ -44,18 +44,14 @@ const QString& LdapObject::getDistinguishedName(void) const
     return distinguishedName;
 }
 
-QString LdapObject::getShortName(void) const
+QString LdapObject::getIdentifier(void) const
 {
-    QString shortenedName { distinguishedName };
-    int separatorPosition = distinguishedName.indexOf(',');
-    if (separatorPosition >= 0) {
-        shortenedName = shortenedName.mid(0, separatorPosition);
+    QRegExp regexCurrentIdentifier { R"re(^\w+=([\w\.-]+),.+$)re" };
+    if (regexCurrentIdentifier.exactMatch(distinguishedName)) {
+        return regexCurrentIdentifier.cap(1);
     }
-    separatorPosition = shortenedName.indexOf('=');
-    if (separatorPosition >= 0) {
-        shortenedName = shortenedName.mid(separatorPosition + 1);
-    }
-    return shortenedName;
+
+    return distinguishedName;
 }
 
 LdapAttributes LdapObject::getAttributes(void) const

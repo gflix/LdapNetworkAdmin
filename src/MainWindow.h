@@ -60,6 +60,7 @@ public slots:
     void addOrganizationalUnit(void);
     void selectNetworkTreeItem(const QModelIndex& index);
     void deleteNetworkTreeItem(void);
+    void updateOrganizationalUnit(void);
 
 protected slots:
     void updateNetworkTree(void);
