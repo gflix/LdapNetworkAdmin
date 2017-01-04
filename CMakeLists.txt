@@ -5,8 +5,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 include_directories(src)
 
-find_package(Qt5Widgets)
-find_package(Qt5Xml)
+set(TRANSLATIONS i18n/ldap-network-admin_de.ts)
+
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Xml REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
+
+qt5_add_translation(QM ${TRANSLATIONS})
 
 # Find LDAP development files
 find_path(LDAP_INCLUDE_DIR ldap.h)
@@ -45,5 +50,6 @@ add_executable(
 	src/ModelNetworkTree.cpp
 	src/LdapConnection.cpp
 	src/LdapObject.cpp
+	${QM}
 )
 target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml ${LDAP_LIBRARIES})

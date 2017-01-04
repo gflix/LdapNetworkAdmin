@@ -5,12 +5,17 @@
  *      Author: felix
  */
 
+#include <QtCore/QTranslator>
 #include <QtWidgets/QApplication>
 #include <MainWindow.h>
 
 int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
+    QTranslator translator;
+    translator.load(QLocale(), "ldap-network-admin", "_");
+    application.installTranslator(&translator);
+
     Flix::MainWindow mainWindow;
 
     mainWindow.show();
