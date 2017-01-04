@@ -52,6 +52,7 @@ public slots:
     void saveConnection(void);
     void deleteConnection(void);
     void selectConnection(const QModelIndex& index);
+    void selectConnectionAndAccept(const QModelIndex& index);
 };
 
 } /* namespace Flix */

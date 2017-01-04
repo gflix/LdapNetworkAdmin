@@ -109,6 +109,13 @@ void DialogConnections::selectConnection(const QModelIndex& index)
     buttonDeleteConnection->setEnabled(true);
 }
 
+void DialogConnections::selectConnectionAndAccept(const QModelIndex& index)
+{
+    selectConnection(index);
+
+    emit accept();
+}
+
 void DialogConnections::initLayout(void)
 {
     int lineIndex = 0;
@@ -151,6 +158,7 @@ void DialogConnections::initLayout(void)
     viewConnections = new QTreeView();
     viewConnections->setModel(connections);
     connect(viewConnections, SIGNAL(clicked(const QModelIndex&)), this, SLOT(selectConnection(const QModelIndex&)));
+    connect(viewConnections, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(selectConnectionAndAccept(const QModelIndex&)));
     layout->addWidget(viewConnections, 1, 0, lineIndex - 1, 1);
 
     QHBoxLayout* layoutConnectionModificationButtons = new QHBoxLayout();
