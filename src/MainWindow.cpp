@@ -17,7 +17,6 @@
 #include <DialogTextInput.h>
 #include <LdapObjectOrganizationalUnit.h>
 #include <LdapObjectNetworkHost.h>
-#include <LdapTags.h>
 
 namespace Flix {
 
@@ -361,10 +360,9 @@ void MainWindow::setupPanelNetworkHost(const GenericLdapObject* object)
     if (!object) {
         return;
     }
-    panelNetworkHost->setHostName(object->getIdentifier());
-
-    const LdapAttributeValues& values = object->getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
-    if (!values.empty()) panelNetworkHost->setIpAddress(values[0]);
+    LdapObjectNetworkHost* objectNetworkHost = (LdapObjectNetworkHost*) object;
+    panelNetworkHost->setHostName(objectNetworkHost->getIdentifier());
+    panelNetworkHost->setIpAddress(objectNetworkHost->getIpAddress());
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)

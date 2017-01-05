@@ -11,6 +11,7 @@
 #include <LdapObjectDcObject.h>
 #include <LdapObjectOrganizationalUnit.h>
 #include <LdapObjectNetworkHost.h>
+#include <LdapObjectUnknown.h>
 #include <LdapTags.h>
 
 namespace Flix {
@@ -142,10 +143,13 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
         switch (ldapMessageType) {
         case LDAP_RES_SEARCH_ENTRY:
             retrieveLdapObject(ldapMessage, &object);
-            if (object && object->isValid()) {
-                objects.push_back(object);
-            } else {
+            if (!object) {
+                break;
+            }
+            if (!object->isValid()) {
                 returnValue = false;
+            } else {
+                objects.push_back(object);
             }
             break;
         case LDAP_RES_SEARCH_RESULT:
@@ -253,6 +257,8 @@ void LdapConnection::retrieveLdapObject(LDAPMessage* message, GenericLdapObject*
         *object = new LdapObjectOrganizationalUnit();
     } else if (objectClasses.contains(LDAP_OBJECT_CLASS_DC_OBJECT)) {
         *object = new LdapObjectDcObject();
+    } else {
+        *object = new LdapObjectUnknown();
     }
     if (!(*object)) {
         return;

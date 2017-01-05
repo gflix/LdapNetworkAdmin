@@ -29,6 +29,22 @@ bool LdapObjectNetworkHost::isValid(void) const
         objectClasses.contains(LDAP_OBJECT_CLASS_IP_HOST);
 }
 
+QString LdapObjectNetworkHost::getIpAddress(void) const
+{
+    const LdapAttributeValues& ipHostNumbers = getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
+
+    if (!ipHostNumbers.empty()) {
+        return ipHostNumbers[0];
+    }
+    return QString();
+}
+
+void LdapObjectNetworkHost::setIpAddress(const QString& ipAddress)
+{
+    LdapAttributeValues ipHostNumbers { ipAddress };
+    setAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipHostNumbers);
+}
+
 LdapObjectNetworkHost* LdapObjectNetworkHost::create(const QString& distinguishedName, const QString& ipAddress)
 {
     LdapObjectNetworkHost* object = new LdapObjectNetworkHost();

@@ -18,6 +18,9 @@ public:
     virtual ~LdapObjectNetworkHost();
 
     virtual bool isValid(void) const;
+    QString getIpAddress(void) const;
+
+    void setIpAddress(const QString& ipAddress);
 
     static LdapObjectNetworkHost* create(const QString& distinguishedName, const QString& ipAddress);
 };
