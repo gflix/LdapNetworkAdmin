@@ -39,6 +39,10 @@ QVariant ModelNetworkTree::data(const QModelIndex &index, int role) const
     if (!item) {
         return QVariant();
     }
+    GenericLdapObject* object = item->getObject();
+    if (!object) {
+        return QVariant();
+    }
 
     if (role == Qt::DisplayRole) {
         return item->getObject()->getIdentifier();
@@ -95,10 +99,13 @@ bool ModelNetworkTree::hasChildren(const QModelIndex& parent) const
         return true;
     }
     const GenericLdapObject* object = item->getObject();
+    if (!object) {
+        return true;
+    }
     return object->isObjectType(LdapObjectType::DC_OBJECT) || object->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT);
 }
 
-bool ModelNetworkTree::addChild(const GenericLdapObject* object, const QModelIndex &parent)
+bool ModelNetworkTree::addChild(GenericLdapObject* object, const QModelIndex &parent)
 {
     NetworkTreeItem* item = getItem(parent);
     if (!item) {
@@ -123,7 +130,7 @@ void ModelNetworkTree::deleteTree(const QModelIndex& parent)
     }
 }
 
-void ModelNetworkTree::updateItem(const GenericLdapObject* object, const QModelIndex& index)
+void ModelNetworkTree::updateItem(GenericLdapObject* object, const QModelIndex& index)
 {
     NetworkTreeItem* item = getItem(index);
     if (!item) {

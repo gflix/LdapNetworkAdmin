@@ -8,6 +8,7 @@
 #ifndef SRC_GENERICLDAPOBJECT_H_
 #define SRC_GENERICLDAPOBJECT_H_
 
+#include <memory>
 #include <QtCore/QList>
 #include <QtCore/QMap>
 #include <QtCore/QString>
@@ -44,12 +45,6 @@ public:
 
     static GenericLdapObject* getDuplicate(const GenericLdapObject* original);
 
-//    bool isDcObject(void) const;
-//    bool isOrganizationalUnit(void) const;
-//    bool isNetworkHost(void) const;
-
-//    static GenericLdapObject createOrganizationalUnit(const QString& distinguishedName);
-//    static GenericLdapObject createNetworkHost(const QString& distinguishedName);
 protected:
     QString distinguishedName;
 
@@ -58,7 +53,7 @@ private:
     QMap<QString, LdapAttributeValues> attributes;
 };
 
-typedef QList<const GenericLdapObject*> LdapObjects;
+typedef QList<std::shared_ptr<GenericLdapObject>> LdapObjects;
 
 } /* namespace Flix */
 

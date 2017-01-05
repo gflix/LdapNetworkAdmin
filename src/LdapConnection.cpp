@@ -149,7 +149,7 @@ bool LdapConnection::searchObjects(LdapObjects& objects, const QString& searchBa
             if (!object->isValid()) {
                 returnValue = false;
             } else {
-                objects.push_back(object);
+                objects.push_back(std::shared_ptr<GenericLdapObject>(object));
             }
             break;
         case LDAP_RES_SEARCH_RESULT:
@@ -210,7 +210,7 @@ bool LdapConnection::renameObject(GenericLdapObject** object, const QString& new
     if (object) {
         delete *object;
     }
-    *object = GenericLdapObject::getDuplicate(objects[0]);
+    *object = GenericLdapObject::getDuplicate(objects[0].get());
     return true;
 }
 

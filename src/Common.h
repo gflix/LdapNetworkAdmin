@@ -36,20 +36,20 @@ class NetworkTreeItem {
     NetworkTreeItem* parent;
     NetworkTreeItems children;
 
-    const GenericLdapObject* object;
+    GenericLdapObject* object;
 public:
-    NetworkTreeItem(const GenericLdapObject* object, NetworkTreeItem* parent = nullptr);
+    NetworkTreeItem(GenericLdapObject* object, NetworkTreeItem* parent = nullptr);
     virtual ~NetworkTreeItem();
 
     void clearChildren(void);
-    void addChild(const GenericLdapObject* object);
-    void setObject(const GenericLdapObject* object);
+    void addChild(GenericLdapObject* object);
+    void setObject(GenericLdapObject* object);
 
     NetworkTreeItem* getChild(int number);
     int getChildCount(void) const;
     int getChildNumber(void) const;
     NetworkTreeItem* getParent(void) const;
-    const GenericLdapObject* getObject(void) const;
+    GenericLdapObject* getObject(void) const;
 };
 
 

@@ -47,8 +47,8 @@ class MainWindow: public QMainWindow {
     void initMenuBar(void);
     void initLayout(void);
     void setWindowTitleWithState(const QString& state = QString());
-    void setupPanelOrganizationalUnit(const GenericLdapObject* object);
-    void setupPanelNetworkHost(const GenericLdapObject* object);
+    void setupPanelOrganizationalUnit(GenericLdapObject* object);
+    void setupPanelNetworkHost(GenericLdapObject* object);
 
     bool connectToLdapServer(const Connection& connection);
 public:

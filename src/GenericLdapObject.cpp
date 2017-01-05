@@ -9,6 +9,7 @@
 #include <LdapObjectDcObject.h>
 #include <LdapObjectOrganizationalUnit.h>
 #include <LdapObjectNetworkHost.h>
+#include <LdapObjectUnknown.h>
 #include <LdapTags.h>
 
 namespace Flix {
@@ -91,6 +92,9 @@ GenericLdapObject* GenericLdapObject::getDuplicate(const GenericLdapObject* orig
         return duplicate;
     }
     switch (original->getType()) {
+    case LdapObjectType::UNKNOWN:
+        duplicate = new LdapObjectUnknown(*((LdapObjectUnknown*) original));
+        break;
     case LdapObjectType::DC_OBJECT:
         duplicate = new LdapObjectDcObject(*((LdapObjectDcObject*) original));
         break;
