@@ -327,8 +327,10 @@ LDAPMod** LdapConnection::generateLdapAttributes(const GenericLdapObject* object
         char** ldapAttributesValuesPointer = ldapAttribute->mod_values;
 
         for (auto& attributeValue: attributeValues) {
-            *ldapAttributesValuesPointer = ldap_strdup(attributeValue.toStdString().c_str());
-            ++ldapAttributesValuesPointer;
+            if (!attributeValue.isEmpty()) {
+                *ldapAttributesValuesPointer = ldap_strdup(attributeValue.toStdString().c_str());
+                ++ldapAttributesValuesPointer;
+            }
         }
 
         *ldapAttributesPointer = ldapAttribute;
