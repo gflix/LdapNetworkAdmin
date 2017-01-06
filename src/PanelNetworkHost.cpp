@@ -35,29 +35,48 @@ void PanelNetworkHost::initLayout(void)
     editIpAddress = new QLineEdit();
     layout->addWidget(editIpAddress, rowIndex++, 1);
 
+    checkboxDhcpClient = new QCheckBox(tr("DHCP client"));
+    layout->addWidget(checkboxDhcpClient, rowIndex++, 0, 1, 2);
+    connect(checkboxDhcpClient, SIGNAL(toggled(bool)), this, SLOT(checkboxDhcpClientToggled(bool)));
+
+    layout->addWidget(new QLabel(tr("MAC address") + ':'), rowIndex, 0);
+    editMacAddress = new QLineEdit();
+    editMacAddress->setEnabled(false);
+    layout->addWidget(editMacAddress, rowIndex++, 1);
+
     layout->setRowStretch(rowIndex++, 1);
 
     mainContent->setLayout(layout);
 }
 
-QString PanelNetworkHost::getHostName(void) const
+PanelNetworkHostSettings PanelNetworkHost::getSettings(void) const
 {
-    return editHostName->text();
+    PanelNetworkHostSettings settings;
+    settings.hostName = editHostName->text();
+    settings.ipAddress = editIpAddress->text();
+    if (checkboxDhcpClient->isChecked()) {
+        settings.macAddress = editMacAddress->text();
+    }
+
+    return settings;
 }
 
-QString PanelNetworkHost::getIpAddress(void) const
+void PanelNetworkHost::setSettings(const PanelNetworkHostSettings& settings)
 {
-    return editIpAddress->text();
+    editHostName->setText(settings.hostName);
+    editIpAddress->setText(settings.ipAddress);
+    if (!settings.macAddress.isEmpty()) {
+        checkboxDhcpClient->setChecked(true);
+        editMacAddress->setText(settings.macAddress);
+    } else {
+        checkboxDhcpClient->setChecked(false);
+        editMacAddress->clear();
+    }
 }
 
-void PanelNetworkHost::setHostName(const QString& hostName)
+void PanelNetworkHost::checkboxDhcpClientToggled(bool state)
 {
-    editHostName->setText(hostName);
-}
-
-void PanelNetworkHost::setIpAddress(const QString& ipAddress)
-{
-    editIpAddress->setText(ipAddress);
+    editMacAddress->setEnabled(state);
 }
 
 } /* namespace Flix */

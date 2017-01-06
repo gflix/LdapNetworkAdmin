@@ -8,10 +8,17 @@
 #ifndef SRC_PANELNETWORKHOST_H_
 #define SRC_PANELNETWORKHOST_H_
 
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QLineEdit>
 #include <GenericPanelItemEdit.h>
 
 namespace Flix {
+
+struct PanelNetworkHostSettings {
+    QString hostName;
+    QString ipAddress;
+    QString macAddress;
+};
 
 class PanelNetworkHost: public GenericPanelItemEdit {
     Q_OBJECT
@@ -20,16 +27,19 @@ public:
     PanelNetworkHost(QWidget* parent = 0);
     virtual ~PanelNetworkHost();
 
-    QString getHostName(void) const;
-    QString getIpAddress(void) const;
-    void setHostName(const QString& hostName);
-    void setIpAddress(const QString& ipAddress);
+    PanelNetworkHostSettings getSettings(void) const;
+    void setSettings(const PanelNetworkHostSettings& settings);
 
 private:
     QLineEdit* editHostName;
     QLineEdit* editIpAddress;
+    QCheckBox* checkboxDhcpClient;
+    QLineEdit* editMacAddress;
 
     virtual void initLayout(void);
+
+protected slots:
+    void checkboxDhcpClientToggled(bool);
 };
 
 } /* namespace Flix */

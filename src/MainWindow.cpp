@@ -175,8 +175,9 @@ void MainWindow::updateNetworkHost(void)
         return;
     }
     LdapObjectNetworkHost* objectNetworkHost = (LdapObjectNetworkHost*) object;
-    if (objectNetworkHost->getIdentifier() != panelNetworkHost->getHostName()) {
-        if (!ldapConnection.renameObject((GenericLdapObject**) (&objectNetworkHost), panelNetworkHost->getHostName())) {
+    PanelNetworkHostSettings networkHostSettings = panelNetworkHost->getSettings();
+    if (objectNetworkHost->getIdentifier() != networkHostSettings.hostName) {
+        if (!ldapConnection.renameObject((GenericLdapObject**) (&objectNetworkHost), networkHostSettings.hostName)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not rename the LDAP object") + '!');
             return;
         }
@@ -191,8 +192,14 @@ void MainWindow::updateNetworkHost(void)
             emit networkTreeExpanded(index);
         }
     }
-    if (objectNetworkHost->getIpAddress() != panelNetworkHost->getIpAddress()) {
-        qDebug() << "need to change the IP address";
+    if (objectNetworkHost->getIpAddress() != networkHostSettings.ipAddress ||
+        objectNetworkHost->getMacAddress() != networkHostSettings.macAddress) {
+        objectNetworkHost->setIpAddress(networkHostSettings.ipAddress);
+        objectNetworkHost->setMacAddress(networkHostSettings.macAddress);
+        if (!ldapConnection.updateObject((GenericLdapObject*) objectNetworkHost)) {
+            QMessageBox::critical(this, tr("Error"), tr("Could not update the LDAP object") + '!');
+            return;
+        }
     }
 }
 
@@ -356,8 +363,13 @@ void MainWindow::setupPanelNetworkHost(GenericLdapObject* object)
         return;
     }
     LdapObjectNetworkHost* objectNetworkHost = (LdapObjectNetworkHost*) object;
-    panelNetworkHost->setHostName(objectNetworkHost->getIdentifier());
-    panelNetworkHost->setIpAddress(objectNetworkHost->getIpAddress());
+    PanelNetworkHostSettings networkHostSettings;
+
+    networkHostSettings.hostName = objectNetworkHost->getIdentifier();
+    networkHostSettings.ipAddress = objectNetworkHost->getIpAddress();
+    networkHostSettings.macAddress = objectNetworkHost->getMacAddress();
+
+    panelNetworkHost->setSettings(networkHostSettings);
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)

@@ -19,8 +19,10 @@ public:
 
     virtual bool isValid(void) const;
     QString getIpAddress(void) const;
+    QString getMacAddress(void) const;
 
     void setIpAddress(const QString& ipAddress);
+    void setMacAddress(const QString& macAddress);
 
     static LdapObjectNetworkHost* create(const QString& distinguishedName, const QString& ipAddress);
 };

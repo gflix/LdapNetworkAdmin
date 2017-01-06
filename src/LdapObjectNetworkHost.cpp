@@ -39,10 +39,26 @@ QString LdapObjectNetworkHost::getIpAddress(void) const
     return QString();
 }
 
+QString LdapObjectNetworkHost::getMacAddress(void) const
+{
+    const LdapAttributeValues& macAddresses = getAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS);
+
+    if (!macAddresses.empty()) {
+        return macAddresses[0];
+    }
+    return QString();
+}
+
 void LdapObjectNetworkHost::setIpAddress(const QString& ipAddress)
 {
     LdapAttributeValues ipHostNumbers { ipAddress };
     setAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipHostNumbers);
+}
+
+void LdapObjectNetworkHost::setMacAddress(const QString& macAddress)
+{
+    LdapAttributeValues macAddresses { macAddress };
+    setAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddresses);
 }
 
 LdapObjectNetworkHost* LdapObjectNetworkHost::create(const QString& distinguishedName, const QString& ipAddress)
@@ -51,7 +67,7 @@ LdapObjectNetworkHost* LdapObjectNetworkHost::create(const QString& distinguishe
 
     object->setDistinguishedName(distinguishedName);
 
-    LdapAttributeValues values { LDAP_OBJECT_CLASS_TOP, LDAP_OBJECT_CLASS_DEVICE, LDAP_OBJECT_CLASS_IP_HOST };
+    LdapAttributeValues values { LDAP_OBJECT_CLASS_TOP, LDAP_OBJECT_CLASS_DEVICE, LDAP_OBJECT_CLASS_IP_HOST, LDAP_OBJECT_CLASS_IEEE802_DEVICE };
     object->setAttribute(LDAP_ATTRIBUTE_OBJECT_CLASS, values);
 
     values = { ipAddress };

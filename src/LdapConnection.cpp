@@ -214,6 +214,26 @@ bool LdapConnection::renameObject(GenericLdapObject** object, const QString& new
     return true;
 }
 
+bool LdapConnection::updateObject(const GenericLdapObject* object) const
+{
+    if (!bound || !object || !object->isValid()) {
+        return false;
+    }
+
+    std::unique_ptr<char> distinguishedName { ldap_strdup(object->getDistinguishedName().toStdString().c_str()) };
+
+    LDAPMod** ldapAttributes = generateLdapAttributes(object, LdapAttributeOperation::MODIFY);
+    if (!ldapAttributes) {
+        return false;
+    }
+
+    bool returnValue = ldap_modify_ext_s(handle, distinguishedName.get(), ldapAttributes, nullptr, nullptr) == LDAP_SUCCESS;
+
+    freeLdapAttributes(ldapAttributes);
+
+    return returnValue;
+}
+
 void LdapConnection::retrieveLdapObject(LDAPMessage* message, GenericLdapObject** object) const
 {
     Q_ASSERT(bound);
@@ -251,7 +271,9 @@ void LdapConnection::retrieveLdapObject(LDAPMessage* message, GenericLdapObject*
 
     const LdapAttributeValues& objectClasses = attributes[LDAP_ATTRIBUTE_OBJECT_CLASS];
     *object = nullptr;
-    if (objectClasses.contains(LDAP_OBJECT_CLASS_DEVICE) && objectClasses.contains(LDAP_OBJECT_CLASS_IP_HOST)) {
+    if (objectClasses.contains(LDAP_OBJECT_CLASS_DEVICE) &&
+        objectClasses.contains(LDAP_OBJECT_CLASS_IP_HOST) &&
+        objectClasses.contains(LDAP_OBJECT_CLASS_IEEE802_DEVICE)) {
         *object = new LdapObjectNetworkHost();
     } else if (objectClasses.contains(LDAP_OBJECT_CLASS_ORGANIZATIONAL_UNIT)) {
         *object = new LdapObjectOrganizationalUnit();
