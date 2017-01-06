@@ -5,7 +5,6 @@
  *      Author: felix
  */
 
-#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStandardPaths>
@@ -122,18 +121,15 @@ void ModelConnections::load(void)
     QFile fileConnections(QStandardPaths::locate(QStandardPaths::ConfigLocation, FILENAME_CONNECTIONS));
     connections.clear();
     if (!fileConnections.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qInfo() << "Could not open file for reading \"" << fileConnections.fileName() << "\"! Skipping.";
         return;
     }
 
     QDomDocument domConnections;
     if (!domConnections.setContent(&fileConnections)) {
-        qInfo() << "Could not parse file \"" << fileConnections.fileName() << "\"! Skipping.";
         return;
     }
     QDomElement elementConnections = domConnections.documentElement();
     if (elementConnections.tagName() != XML_ELEMENT_CONNECTIONS) {
-        qInfo() << "Wrong document element \"" << elementConnections.tagName() << "\" in file \"" << fileConnections.fileName() << "\"! Skipping.";
         return;
     }
     for (auto elementConnection = elementConnections.firstChildElement(XML_ELEMENT_CONNECTION); !elementConnection.isNull();
@@ -159,7 +155,6 @@ void ModelConnections::save(void)
     QFile fileConnections(dirConnections.filePath(FILENAME_CONNECTIONS));
 
     if (!fileConnections.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "Could not open file for writing \"" << fileConnections.fileName() << "\"!";
         return;
     }
 
