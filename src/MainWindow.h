@@ -49,6 +49,7 @@ class MainWindow: public QMainWindow {
     void setWindowTitleWithState(const QString& state = QString());
     void setupPanelOrganizationalUnit(GenericLdapObject* object);
     void setupPanelNetworkHost(GenericLdapObject* object);
+    void setAddActionsEnabled(bool state);
 
     bool connectToLdapServer(const Connection& connection);
 public:

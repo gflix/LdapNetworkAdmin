@@ -109,6 +109,7 @@ void MainWindow::addNetworkHost(void)
 
 void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
 {
+    setAddActionsEnabled(false);
     if (!index.isValid()) {
         return;
     }
@@ -122,6 +123,10 @@ void MainWindow::selectNetworkTreeItem(const QModelIndex& index)
         stackedPanels->setCurrentWidget(panelNetworkHost);
     } else {
         stackedPanels->setCurrentWidget(panelDefault);
+    }
+
+    if (object->isObjectType(LdapObjectType::ORGANIZATIONAL_UNIT) || object->isObjectType(LdapObjectType::DC_OBJECT)) {
+        setAddActionsEnabled(true);
     }
 }
 
@@ -270,10 +275,13 @@ void MainWindow::initActions(void)
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
     actionAddOrganizationalUnit = new QAction(tr("Organizational &unit"), this);
+    actionAddOrganizationalUnit->setShortcut(Qt::CTRL | Qt::Key_O);
     connect(actionAddOrganizationalUnit, SIGNAL(triggered()), this, SLOT(addOrganizationalUnit()));
 
     actionAddNetworkHost = new QAction(tr("Network &host"), this);
+    actionAddNetworkHost->setShortcut(Qt::CTRL | Qt::Key_N);
     connect(actionAddNetworkHost, SIGNAL(triggered()), this, SLOT(addNetworkHost()));
+    setAddActionsEnabled(false);
 
     connect(this, SIGNAL(connectedToLdapServer()), this, SLOT(updateNetworkTree()));
 }
@@ -370,6 +378,12 @@ void MainWindow::setupPanelNetworkHost(GenericLdapObject* object)
     networkHostSettings.macAddress = objectNetworkHost->getMacAddress();
 
     panelNetworkHost->setSettings(networkHostSettings);
+}
+
+void MainWindow::setAddActionsEnabled(bool state)
+{
+    actionAddOrganizationalUnit->setEnabled(state);
+    actionAddNetworkHost->setEnabled(state);
 }
 
 bool MainWindow::connectToLdapServer(const Connection& connection)
