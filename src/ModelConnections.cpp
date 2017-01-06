@@ -8,6 +8,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStandardPaths>
+#include <QtCore/QTextStream>
 #include <QtXml/QDomDocument>
 #include <ModelConnections.h>
 
