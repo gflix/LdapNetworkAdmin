@@ -47,6 +47,8 @@ public:
 
 protected:
     QString distinguishedName;
+    bool getSingleAttribute(const QString& attribute, QString& attributeValue) const;
+    void setSingleAttribute(const QString& attribute, const QString& attributeValue);
 
 private:
     LdapObjectType type;

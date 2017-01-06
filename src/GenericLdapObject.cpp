@@ -85,6 +85,23 @@ LdapAttributeValues GenericLdapObject::getAttribute(const QString& attribute) co
     return attributes[attribute];
 }
 
+bool GenericLdapObject::getSingleAttribute(const QString& attribute, QString& attributeValue) const
+{
+    const LdapAttributeValues& values = getAttribute(attribute);
+
+    if (values.empty()) {
+        return false;
+    }
+    attributeValue = values[0];
+    return true;
+}
+
+void GenericLdapObject::setSingleAttribute(const QString& attribute, const QString& attributeValue)
+{
+    LdapAttributeValues values { attributeValue };
+    setAttribute(attribute, values);
+}
+
 GenericLdapObject* GenericLdapObject::getDuplicate(const GenericLdapObject* original)
 {
     GenericLdapObject* duplicate = nullptr;
