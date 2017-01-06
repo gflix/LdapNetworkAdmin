@@ -5,8 +5,8 @@
  *      Author: felix
  */
 
-#include <LdapObjectDcObject.h>
-#include <LdapTags.h>
+#include <common/LdapObjectDcObject.h>
+#include <common/LdapTags.h>
 
 namespace Flix {
 

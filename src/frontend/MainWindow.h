@@ -12,12 +12,12 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QTreeView>
-#include <Common.h>
-#include <LdapConnection.h>
-#include <ModelNetworkTree.h>
-#include <PanelDefault.h>
-#include <PanelOrganizationalUnit.h>
-#include <PanelNetworkHost.h>
+#include <common/Common.h>
+#include <common/LdapConnection.h>
+#include <frontend/ModelNetworkTree.h>
+#include <frontend/PanelDefault.h>
+#include <frontend/PanelOrganizationalUnit.h>
+#include <frontend/PanelNetworkHost.h>
 
 namespace Flix {
 

@@ -5,12 +5,12 @@
  *      Author: felix
  */
 
-#include <GenericLdapObject.h>
-#include <LdapObjectDcObject.h>
-#include <LdapObjectOrganizationalUnit.h>
-#include <LdapObjectNetworkHost.h>
-#include <LdapObjectUnknown.h>
-#include <LdapTags.h>
+#include <common/GenericLdapObject.h>
+#include <common/LdapObjectDcObject.h>
+#include <common/LdapObjectOrganizationalUnit.h>
+#include <common/LdapObjectNetworkHost.h>
+#include <common/LdapObjectUnknown.h>
+#include <common/LdapTags.h>
 
 namespace Flix {
 

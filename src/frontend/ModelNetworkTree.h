@@ -9,7 +9,7 @@
 #define SRC_MODELNETWORKTREE_H_
 
 #include <QtCore/QAbstractItemModel>
-#include <Common.h>
+#include <common/Common.h>
 
 namespace Flix {
 

@@ -5,7 +5,7 @@
  *      Author: felix
  */
 
-#include <LdapObjectUnknown.h>
+#include <common/LdapObjectUnknown.h>
 
 namespace Flix {
 

@@ -8,7 +8,7 @@
 #include <QtCore/QDebug>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
-#include <PanelNetworkHost.h>
+#include <frontend/PanelNetworkHost.h>
 
 namespace Flix {
 

@@ -7,7 +7,7 @@
 
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
-#include <PanelDefault.h>
+#include <frontend/PanelDefault.h>
 
 namespace Flix {
 

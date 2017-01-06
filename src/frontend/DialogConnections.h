@@ -8,12 +8,12 @@
 #ifndef SRC_DIALOGCONNECTIONS_H_
 #define SRC_DIALOGCONNECTIONS_H_
 
-#include <ModelConnections.h>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTreeView>
+#include <frontend/ModelConnections.h>
 
 namespace Flix {
 

@@ -8,7 +8,7 @@
 #ifndef SRC_LDAPOBJECTNETWORKHOST_H_
 #define SRC_LDAPOBJECTNETWORKHOST_H_
 
-#include <GenericLdapObject.h>
+#include <common/GenericLdapObject.h>
 
 namespace Flix {
 

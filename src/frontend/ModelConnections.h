@@ -9,7 +9,7 @@
 #define SRC_MODELCONNECTIONS_H_
 
 #include <QtCore/QAbstractListModel>
-#include <Common.h>
+#include <common/Common.h>
 
 namespace Flix {
 

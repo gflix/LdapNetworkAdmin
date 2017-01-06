@@ -8,7 +8,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
-#include <DialogPassword.h>
+#include <frontend/DialogPassword.h>
 
 namespace Flix {
 

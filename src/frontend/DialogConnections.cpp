@@ -10,7 +10,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
-#include <DialogConnections.h>
+#include <frontend/DialogConnections.h>
 
 #define DEFAULT_LDAP_PORT "389"
 

@@ -7,7 +7,7 @@
 
 #include <QtCore/QTranslator>
 #include <QtWidgets/QApplication>
-#include <MainWindow.h>
+#include <frontend/MainWindow.h>
 
 int main(int argc, char* argv[])
 {

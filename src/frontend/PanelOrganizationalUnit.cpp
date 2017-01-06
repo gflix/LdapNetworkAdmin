@@ -8,7 +8,7 @@
 #include <QtCore/QDebug>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
-#include <PanelOrganizationalUnit.h>
+#include <frontend/PanelOrganizationalUnit.h>
 
 namespace Flix {
 

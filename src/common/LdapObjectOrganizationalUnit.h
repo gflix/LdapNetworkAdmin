@@ -8,7 +8,7 @@
 #ifndef SRC_LDAPOBJECTORGANIZATIONALUNIT_H_
 #define SRC_LDAPOBJECTORGANIZATIONALUNIT_H_
 
-#include <GenericLdapObject.h>
+#include <common/GenericLdapObject.h>
 
 namespace Flix {
 

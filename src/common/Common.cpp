@@ -5,7 +5,7 @@
  *      Author: felix
  */
 
-#include <Common.h>
+#include <common/Common.h>
 
 namespace Flix {
 

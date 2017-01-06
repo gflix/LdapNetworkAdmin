@@ -10,7 +10,7 @@
 #include <QtCore/QStandardPaths>
 #include <QtCore/QTextStream>
 #include <QtXml/QDomDocument>
-#include <ModelConnections.h>
+#include <frontend/ModelConnections.h>
 
 #define FILENAME_CONNECTIONS "LdapNetworkAdminConnections.xml"
 

@@ -8,7 +8,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
-#include <DialogTextInput.h>
+#include <frontend/DialogTextInput.h>
 
 DialogTextInput::DialogTextInput(const QString& title, const QString& prompt, QWidget* parent, Qt::WindowFlags flags):
     QDialog(parent, flags)

@@ -8,9 +8,9 @@
 #ifndef SRC_COMMON_H_
 #define SRC_COMMON_H_
 
-#include <GenericLdapObject.h>
 #include <QtCore/QList>
 #include <QtCore/QString>
+#include <common/GenericLdapObject.h>
 
 namespace Flix {
 

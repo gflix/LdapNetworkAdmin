@@ -11,12 +11,12 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
-#include <MainWindow.h>
-#include <DialogConnections.h>
-#include <DialogPassword.h>
-#include <DialogTextInput.h>
-#include <LdapObjectOrganizationalUnit.h>
-#include <LdapObjectNetworkHost.h>
+#include <frontend/MainWindow.h>
+#include <frontend/DialogConnections.h>
+#include <frontend/DialogPassword.h>
+#include <frontend/DialogTextInput.h>
+#include <common/LdapObjectOrganizationalUnit.h>
+#include <common/LdapObjectNetworkHost.h>
 
 namespace Flix {
 

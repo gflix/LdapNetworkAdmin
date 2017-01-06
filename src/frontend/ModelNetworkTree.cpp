@@ -5,7 +5,7 @@
  *      Author: felix
  */
 
-#include <ModelNetworkTree.h>
+#include <frontend/ModelNetworkTree.h>
 
 namespace Flix {
 

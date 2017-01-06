@@ -8,7 +8,7 @@
 #include <QtCore/QDebug>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QVBoxLayout>
-#include <GenericPanelItemEdit.h>
+#include <frontend/GenericPanelItemEdit.h>
 
 namespace Flix {
 

@@ -9,7 +9,7 @@
 #define SRC_PANELORGANIZATIONALUNIT_H_
 
 #include <QtWidgets/QLineEdit>
-#include <GenericPanelItemEdit.h>
+#include <frontend/GenericPanelItemEdit.h>
 
 namespace Flix {
 

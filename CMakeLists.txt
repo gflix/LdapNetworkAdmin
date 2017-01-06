@@ -37,24 +37,24 @@ endif(LDAP_FOUND)
 
 add_executable(
 	ldap-network-admin WIN32
-	src/LdapNetworkAdmin.cpp
-	src/Common.cpp
-	src/MainWindow.cpp
-	src/GenericPanelItemEdit.cpp
-	src/PanelDefault.cpp
-	src/PanelNetworkHost.cpp
-	src/PanelOrganizationalUnit.cpp
-	src/DialogConnections.cpp
-	src/DialogPassword.cpp
-	src/DialogTextInput.cpp
-	src/ModelConnections.cpp
-	src/ModelNetworkTree.cpp
-	src/LdapConnection.cpp
-	src/GenericLdapObject.cpp
-	src/LdapObjectDcObject.cpp
-	src/LdapObjectOrganizationalUnit.cpp
-	src/LdapObjectNetworkHost.cpp
-	src/LdapObjectUnknown.cpp
+	src/frontend/LdapNetworkAdmin.cpp
+	src/common/Common.cpp
+	src/frontend/MainWindow.cpp
+	src/frontend/GenericPanelItemEdit.cpp
+	src/frontend/PanelDefault.cpp
+	src/frontend/PanelNetworkHost.cpp
+	src/frontend/PanelOrganizationalUnit.cpp
+	src/frontend/DialogConnections.cpp
+	src/frontend/DialogPassword.cpp
+	src/frontend/DialogTextInput.cpp
+	src/frontend/ModelConnections.cpp
+	src/frontend/ModelNetworkTree.cpp
+	src/common/LdapConnection.cpp
+	src/common/GenericLdapObject.cpp
+	src/common/LdapObjectDcObject.cpp
+	src/common/LdapObjectOrganizationalUnit.cpp
+	src/common/LdapObjectNetworkHost.cpp
+	src/common/LdapObjectUnknown.cpp
 	${QM}
 )
 target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml ${LDAP_LIBRARIES})

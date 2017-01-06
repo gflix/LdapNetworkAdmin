@@ -9,8 +9,8 @@
 #define SRC_LDAPCONNECTION_H_
 
 #include <ldap.h>
-#include <Common.h>
-#include <GenericLdapObject.h>
+#include <common/Common.h>
+#include <common/GenericLdapObject.h>
 
 namespace Flix {
 

@@ -10,7 +10,7 @@
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QLineEdit>
-#include <GenericPanelItemEdit.h>
+#include <frontend/GenericPanelItemEdit.h>
 
 namespace Flix {
 
