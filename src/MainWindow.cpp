@@ -198,8 +198,10 @@ void MainWindow::updateNetworkHost(void)
         }
     }
     if (objectNetworkHost->getIpAddress() != networkHostSettings.ipAddress ||
+        objectNetworkHost->getDescription() != networkHostSettings.description ||
         objectNetworkHost->getMacAddress() != networkHostSettings.macAddress) {
         objectNetworkHost->setIpAddress(networkHostSettings.ipAddress);
+        objectNetworkHost->setDescription(networkHostSettings.description);
         objectNetworkHost->setMacAddress(networkHostSettings.macAddress);
         if (!ldapConnection.updateObject((GenericLdapObject*) objectNetworkHost)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not update the LDAP object") + '!');
@@ -375,6 +377,7 @@ void MainWindow::setupPanelNetworkHost(GenericLdapObject* object)
 
     networkHostSettings.hostName = objectNetworkHost->getIdentifier();
     networkHostSettings.ipAddress = objectNetworkHost->getIpAddress();
+    networkHostSettings.description = objectNetworkHost->getDescription();
     networkHostSettings.macAddress = objectNetworkHost->getMacAddress();
 
     panelNetworkHost->setSettings(networkHostSettings);

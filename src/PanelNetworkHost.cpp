@@ -31,6 +31,10 @@ void PanelNetworkHost::initLayout(void)
     editHostName = new QLineEdit();
     layout->addWidget(editHostName, rowIndex++, 1);
 
+    layout->addWidget(new QLabel(tr("Description") + ':'), rowIndex, 0);
+    editDescription = new QLineEdit();
+    layout->addWidget(editDescription, rowIndex++, 1);
+
     layout->addWidget(new QLabel(tr("IP address") + ':'), rowIndex, 0);
     editIpAddress = new QLineEdit();
     layout->addWidget(editIpAddress, rowIndex++, 1);
@@ -53,6 +57,7 @@ PanelNetworkHostSettings PanelNetworkHost::getSettings(void) const
 {
     PanelNetworkHostSettings settings;
     settings.hostName = editHostName->text();
+    settings.description = editDescription->text();
     settings.ipAddress = editIpAddress->text();
     if (checkboxDhcpClient->isChecked()) {
         settings.macAddress = editMacAddress->text();
@@ -64,6 +69,7 @@ PanelNetworkHostSettings PanelNetworkHost::getSettings(void) const
 void PanelNetworkHost::setSettings(const PanelNetworkHostSettings& settings)
 {
     editHostName->setText(settings.hostName);
+    editDescription->setText(settings.description);
     editIpAddress->setText(settings.ipAddress);
     if (!settings.macAddress.isEmpty()) {
         checkboxDhcpClient->setChecked(true);

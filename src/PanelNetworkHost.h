@@ -16,6 +16,7 @@ namespace Flix {
 
 struct PanelNetworkHostSettings {
     QString hostName;
+    QString description;
     QString ipAddress;
     QString macAddress;
 };
@@ -32,6 +33,7 @@ public:
 
 private:
     QLineEdit* editHostName;
+    QLineEdit* editDescription;
     QLineEdit* editIpAddress;
     QCheckBox* checkboxDhcpClient;
     QLineEdit* editMacAddress;

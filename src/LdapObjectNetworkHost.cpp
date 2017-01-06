@@ -31,35 +31,44 @@ bool LdapObjectNetworkHost::isValid(void) const
 
 QString LdapObjectNetworkHost::getIpAddress(void) const
 {
-    const LdapAttributeValues& ipHostNumbers = getAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER);
-
-    if (!ipHostNumbers.empty()) {
-        return ipHostNumbers[0];
+    QString ipHostNumber;
+    if (!getSingleAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipHostNumber)) {
+        return QString();
     }
-    return QString();
+    return ipHostNumber;
+}
+
+QString LdapObjectNetworkHost::getDescription(void) const
+{
+    QString description;
+    if (!getSingleAttribute(LDAP_ATTRIBUTE_DESCRIPTION, description)) {
+        return QString();
+    }
+    return description;
 }
 
 QString LdapObjectNetworkHost::getMacAddress(void) const
 {
-    const LdapAttributeValues& macAddresses = getAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS);
-
-    if (!macAddresses.empty()) {
-        return macAddresses[0];
+    QString macAddress;
+    if (!getSingleAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddress)) {
+        return QString();
     }
-    return QString();
+    return macAddress;
 }
 
 void LdapObjectNetworkHost::setIpAddress(const QString& ipAddress)
 {
-    LdapAttributeValues ipHostNumbers { ipAddress };
-    setAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipHostNumbers);
+    setSingleAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipAddress);
+}
+
+void LdapObjectNetworkHost::setDescription(const QString& description)
+{
+    setSingleAttribute(LDAP_ATTRIBUTE_DESCRIPTION, description);
 }
 
 void LdapObjectNetworkHost::setMacAddress(const QString& macAddress)
 {
-    LdapAttributeValues macAddresses { macAddress };
-    setAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddresses);
-}
+    setSingleAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddress);}
 
 LdapObjectNetworkHost* LdapObjectNetworkHost::create(const QString& distinguishedName, const QString& ipAddress)
 {
