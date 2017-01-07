@@ -38,7 +38,7 @@ public:
     LdapConnection();
     virtual ~LdapConnection();
 
-    bool bind(const Connection& connection, const QString& authPassword);
+    bool bind(const Connection& connection, const QString& authPassword = QString());
     void unbind();
 
     bool isBound(void) const;

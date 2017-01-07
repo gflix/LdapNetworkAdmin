@@ -62,6 +62,7 @@ target_link_libraries(ldap-network-admin Qt5::Widgets Qt5::Xml ${LDAP_LIBRARIES}
 add_executable(
 	ldap-network-backend WIN32
 	src/backend/LdapNetworkBackend.cpp
+	src/backend/ConfigurationLoader.cpp
 	src/common/Common.cpp
 	src/common/LdapConnection.cpp
 	src/common/GenericLdapObject.cpp
@@ -70,4 +71,4 @@ add_executable(
 	src/common/LdapObjectNetworkHost.cpp
 	src/common/LdapObjectUnknown.cpp
 )
-target_link_libraries(ldap-network-backend Qt5::Core ${LDAP_LIBRARIES})
+target_link_libraries(ldap-network-backend Qt5::Core Qt5::Xml ${LDAP_LIBRARIES})

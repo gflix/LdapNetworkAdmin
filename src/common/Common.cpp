@@ -11,6 +11,7 @@ namespace Flix {
 
 Connection::Connection(void):
     port(0),
+    anonymousBind(false),
     savePassword(false)
 {
 }

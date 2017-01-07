@@ -9,6 +9,7 @@
 #define SRC_BACKEND_CONFIGURATIONLOADER_H_
 
 #include <QtCore/QString>
+#include <QtXml/QDomDocument>
 
 namespace Flix {
 
@@ -35,6 +36,8 @@ public:
 private:
     bool valid;
     LdapNetworkBackendConfiguration configuration;
+
+    bool load(QDomElement& elementConfig);
 };
 
 } /* namespace Flix */

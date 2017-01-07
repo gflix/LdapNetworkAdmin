@@ -21,6 +21,7 @@ struct Connection {
     QString host;
     int port;
     QString baseDn;
+    bool anonymousBind;
     QString authDn;
     QString authPassword;
     bool savePassword;
