@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE LdapAdminBackend>
-<LdapAdminBackend>
+<LdapAdminBackend outputPath="/etc/ldap-admin">
 	<Connection host="serv.benfm.de" port="389" baseDn="ou=NetworkHosts,dc=benfm,dc=de" />
+	<Dns authoritativeNameserver="serv.benfm.de" ttl="3600" />
 </LdapAdminBackend>

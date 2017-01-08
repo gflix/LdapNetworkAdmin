@@ -19,8 +19,15 @@ struct LdapNetworkBackendConnection {
     QString baseDn;
 };
 
+struct LdapNetworkBackendDns {
+    QString authoritativeNameserver;
+    int ttl;
+};
+
 struct LdapNetworkBackendConfiguration {
+    QString outputPath;
     LdapNetworkBackendConnection connection;
+    LdapNetworkBackendDns dns;
 };
 
 class ConfigurationLoader {
@@ -32,9 +39,11 @@ public:
 
     bool isValid(void) const;
     const LdapNetworkBackendConfiguration& getConfiguration(void) const;
+    const QString& getErrorMessage(void);
 
 private:
     bool valid;
+    QString errorMessage;
     LdapNetworkBackendConfiguration configuration;
 
     bool load(QDomElement& elementConfig);

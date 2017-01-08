@@ -9,8 +9,8 @@
 
 namespace Flix {
 
-DnsZoneEntryPtr::DnsZoneEntryPtr(const QString& fullyQualifiedHostname, const QString& ipAddressPart):
-    GenericDnsZoneEntry(DnsZoneEntryType::PTR),
+DnsZoneEntryPtr::DnsZoneEntryPtr(const QString& description, const QString& fullyQualifiedHostname, const QString& ipAddressPart):
+    GenericDnsZoneEntry(DnsZoneEntryType::PTR, description),
     fullyQualifiedHostname(fullyQualifiedHostname),
     ipAddressPart(ipAddressPart)
 {

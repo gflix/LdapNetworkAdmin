@@ -24,11 +24,15 @@ enum class DnsZoneEntryType {
 
 class GenericDnsZoneEntry {
 public:
-    GenericDnsZoneEntry(DnsZoneEntryType type);
+    GenericDnsZoneEntry(DnsZoneEntryType type, const QString& description);
     virtual ~GenericDnsZoneEntry();
 
     DnsZoneEntryType getType(void) const;
+    const QString& getDescription(void) const;
     virtual QString getRecord(void) const = 0;
+
+protected:
+    QString description;
 
 private:
     DnsZoneEntryType type;

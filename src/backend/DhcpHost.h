@@ -15,6 +15,7 @@ namespace Flix {
 
 struct DhcpHost {
     QString fullyQualifiedHostname;
+    QString description;
     QString macAddress;
 };
 

@@ -14,7 +14,7 @@ namespace Flix {
 
 class DnsZoneEntryPtr: public GenericDnsZoneEntry {
 public:
-    DnsZoneEntryPtr(const QString& fullyQualifiedHostname, const QString& ipAddressPart);
+    DnsZoneEntryPtr(const QString& description, const QString& fullyQualifiedHostname, const QString& ipAddressPart);
     virtual ~DnsZoneEntryPtr();
 
     const QString& getFullyQualifiedHostname(void) const;

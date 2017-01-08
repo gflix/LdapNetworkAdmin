@@ -9,7 +9,8 @@
 
 namespace Flix {
 
-GenericDnsZoneEntry::GenericDnsZoneEntry(DnsZoneEntryType type):
+GenericDnsZoneEntry::GenericDnsZoneEntry(DnsZoneEntryType type, const QString& description):
+    description(description),
     type(type)
 {
 }
@@ -21,6 +22,11 @@ GenericDnsZoneEntry::~GenericDnsZoneEntry()
 DnsZoneEntryType GenericDnsZoneEntry::getType(void) const
 {
     return type;
+}
+
+const QString& GenericDnsZoneEntry::getDescription(void) const
+{
+    return description;
 }
 
 } /* namespace Flix */
