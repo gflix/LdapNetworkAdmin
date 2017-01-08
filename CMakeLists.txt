@@ -63,6 +63,10 @@ add_executable(
 	ldap-network-backend WIN32
 	src/backend/LdapNetworkBackend.cpp
 	src/backend/ConfigurationLoader.cpp
+	src/backend/DhcpHost.cpp
+	src/backend/GenericDnsZoneEntry.cpp	
+	src/backend/DnsZoneEntryA.cpp	
+	src/backend/DnsZoneEntryPtr.cpp	
 	src/common/Common.cpp
 	src/common/LdapConnection.cpp
 	src/common/GenericLdapObject.cpp

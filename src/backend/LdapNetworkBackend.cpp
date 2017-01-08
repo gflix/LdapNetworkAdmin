@@ -8,17 +8,13 @@
 #include <iostream>
 #include <QtCore/QList>
 #include <backend/ConfigurationLoader.h>
+#include <backend/DhcpHost.h>
+#include <backend/DnsZoneEntryA.h>
+#include <backend/DnsZoneEntryPtr.h>
 #include <common/LdapConnection.h>
 #include <common/LdapObjectNetworkHost.h>
 
 using namespace std;
-
-struct DhcpHost {
-    QString host;
-    QString macAddress;
-};
-
-typedef QList<DhcpHost> DhcpHosts;
 
 void printUsage(const QString& programName)
 {
@@ -29,7 +25,7 @@ void printUsage(const QString& programName)
     cout << endl;
 }
 
-void processNetworkHost(const Flix::LdapObjectNetworkHost* object, DhcpHosts& dhcpHosts)
+void processNetworkHost(const Flix::LdapObjectNetworkHost* object, Flix::DhcpHosts& dhcpHosts, Flix::DnsZones& dnsForwardZones, Flix::DnsZones& dnsReverseZones)
 {
     if (!object) {
         return;
@@ -38,9 +34,29 @@ void processNetworkHost(const Flix::LdapObjectNetworkHost* object, DhcpHosts& dh
     cout << "  ipAddress  = " << object->getIpAddress().toStdString() << endl;
     cout << "  macAddress = " << object->getMacAddress().toStdString() << endl;
 
+    QRegExp regexHostParts { R"re(^([\w-]+)\.(.+)$)re" };
+    if (!regexHostParts.exactMatch(object->getIdentifier())) {
+        return;
+    }
+
+    QRegExp regexIpAddressParts { R"re(^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$)re" };
+    if (!regexIpAddressParts.exactMatch(object->getIpAddress())) {
+        return;
+    }
+
+    Flix::DnsZoneEntryA* dnsZoneEntryA = new Flix::DnsZoneEntryA(regexHostParts.cap(1), object->getIpAddress());
+    dnsForwardZones[regexHostParts.cap(2)].push_back(Flix::DnsZoneEntry(dnsZoneEntryA));
+
+    Flix::DnsZoneEntryPtr* dnsZoneEntryPtr = new Flix::DnsZoneEntryPtr(object->getIdentifier(), regexIpAddressParts.cap(4));
+    QString dnsReverseZone {
+        regexIpAddressParts.cap(3) + '.' +
+        regexIpAddressParts.cap(2) + '.' +
+        regexIpAddressParts.cap(1) + ".in-addr.arpa"};
+    dnsReverseZones[dnsReverseZone].push_back(Flix::DnsZoneEntry(dnsZoneEntryPtr));
+
     if (!object->getMacAddress().isEmpty()) {
-        DhcpHost dhcpHost;
-        dhcpHost.host = object->getIdentifier();
+        Flix::DhcpHost dhcpHost;
+        dhcpHost.fullyQualifiedHostname = object->getIdentifier();
         dhcpHost.macAddress = object->getMacAddress();
         dhcpHosts.push_back(dhcpHost);
     }
@@ -81,7 +97,9 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    DhcpHosts dhcpHosts;
+    Flix::DhcpHosts dhcpHosts;
+    Flix::DnsZones dnsForwardZones;
+    Flix::DnsZones dnsReverseZones;
 
     cout << "== LDAP ==" << endl;
     for (auto& object: objects) {
@@ -90,13 +108,31 @@ int main(int argc, char* argv[])
             continue;
         }
         cout << ldapObject->getDistinguishedName().toStdString() << endl;
-        processNetworkHost((Flix::LdapObjectNetworkHost*) ldapObject, dhcpHosts);
+        processNetworkHost((Flix::LdapObjectNetworkHost*) ldapObject, dhcpHosts, dnsForwardZones, dnsReverseZones);
     }
 
     cout << endl;
     cout << "== DHCP ==" << endl;
     for (auto& dhcpHost: dhcpHosts) {
-        cout << dhcpHost.host.toStdString() << ": " << dhcpHost.macAddress.toStdString() << endl;
+        cout << dhcpHost.fullyQualifiedHostname.toStdString() << ": " << dhcpHost.macAddress.toStdString() << endl;
+    }
+
+    cout << endl;
+    cout << "== DNS (forward) ==" << endl;
+    for (auto& dnsForwardZone: dnsForwardZones.keys()) {
+        cout << "zone = " << dnsForwardZone.toStdString() << ", entries = " << dnsForwardZones[dnsForwardZone].size() << endl;
+        for (auto& dnsFowardEntry: dnsForwardZones[dnsForwardZone]) {
+            cout << "  " << dnsFowardEntry.get()->getRecord().toStdString() << endl;
+        }
+    }
+
+    cout << endl;
+    cout << "== DNS (reverse) ==" << endl;
+    for (auto& dnsReverseZone: dnsReverseZones.keys()) {
+        cout << "zone = " << dnsReverseZone.toStdString() << ", entries = " << dnsReverseZones[dnsReverseZone].size() << endl;
+        for (auto& dnsReverseEntry: dnsReverseZones[dnsReverseZone]) {
+            cout << "  " << dnsReverseEntry.get()->getRecord().toStdString() << endl;
+        }
     }
 
     return 0;
