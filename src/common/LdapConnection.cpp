@@ -50,10 +50,10 @@ bool LdapConnection::bind(const Connection& newConnection, const QString& authPa
     berval* authCredentialsPointer = nullptr;
     berval authCredentials;
     berval* serverCredentials = nullptr;
+    std::unique_ptr<char> authPasswordCopy { strdup(authPassword.toStdString().c_str()) };
+    authCredentials.bv_val = authPasswordCopy.get();
+    authCredentials.bv_len = strlen(authPasswordCopy.get());
     if (!connection.anonymousBind) {
-        std::unique_ptr<char> authPasswordCopy { strdup(authPassword.toStdString().c_str()) };
-        authCredentials.bv_val = authPasswordCopy.get();
-        authCredentials.bv_len = strlen(authPasswordCopy.get());
         authCredentialsPointer = &authCredentials;
     }
     if (ldap_sasl_bind_s(handle, newConnection.authDn.toStdString().c_str(), nullptr, authCredentialsPointer, nullptr, nullptr, &serverCredentials) != LDAP_SUCCESS) {
