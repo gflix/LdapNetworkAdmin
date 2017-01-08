@@ -272,6 +272,9 @@ void LdapConnection::retrieveLdapObject(LDAPMessage* message, GenericLdapObject*
 
         ldap_memfree(ldapAttribute);
     }
+    if (binaryEncoding) {
+        ber_free(binaryEncoding, 0);
+    }
 
     const LdapAttributeValues& objectClasses = attributes[LDAP_ATTRIBUTE_OBJECT_CLASS];
     *object = nullptr;
