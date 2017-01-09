@@ -14,6 +14,7 @@
 #include <frontend/MainWindow.h>
 #include <frontend/DialogConnections.h>
 #include <frontend/DialogPassword.h>
+#include <frontend/DialogSettings.h>
 #include <frontend/DialogTextInput.h>
 #include <common/LdapObjectOrganizationalUnit.h>
 #include <common/LdapObjectNetworkHost.h>
@@ -63,6 +64,16 @@ void MainWindow::disconnectFromLdapServer(void)
     actionDisconnect->setEnabled(false);
 }
 
+void MainWindow::showSettingsDialog(void)
+{
+    DialogSettings dialog { settings, this };
+    if (dialog.exec() == QDialog::DialogCode::Accepted) {
+        if (!settings.save()) {
+            QMessageBox::warning(this, tr("Warning"), tr("Settings could not be saved") + '!');
+        }
+    }
+}
+
 void MainWindow::addOrganizationalUnit(void)
 {
     const QModelIndex& index = viewNetworkTree->currentIndex();
@@ -71,7 +82,7 @@ void MainWindow::addOrganizationalUnit(void)
         return;
     }
 
-    DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', this };
+    DialogTextInput dialog { tr("Organizational unit"), tr("Enter the name of the new organizational unit") + ':', QString(), this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         // need to store the result in a separate variable, passing the result as an argument may lead to segfault
         QString joinedDistinguishedName { joinDistinguishedName({ parentObject->getDistinguishedName(), "ou=" + dialog.getTextInput() }) };
@@ -93,11 +104,11 @@ void MainWindow::addNetworkHost(void)
         return;
     }
 
-    DialogTextInput dialog { tr("Host name"), tr("Enter the fully qualified host name") + ':', this };
+    DialogTextInput dialog { tr("Host name"), tr("Enter the fully qualified host name") + ':', settings.getDefaults().domainSuffix, this };
     if (dialog.exec() == QDialog::DialogCode::Accepted) {
         // need to store the result in a separate variable, passing the result as an argument may lead to segfault
         QString joinedDistinguishedName { joinDistinguishedName({ parentObject->getDistinguishedName(), "cn=" + dialog.getTextInput() }) };
-        GenericLdapObject* object = LdapObjectNetworkHost::create(joinedDistinguishedName, "0.0.0.0");
+        GenericLdapObject* object = LdapObjectNetworkHost::create(joinedDistinguishedName, settings.getDefaults().ipAddressPrefix);
 
         if (!ldapConnection.addObject(object)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not add the host") + '!');
@@ -258,7 +269,7 @@ void MainWindow::networkTreeCollapsed(const QModelIndex& index)
 
 void MainWindow::initActions(void)
 {
-    actionConnect = new QAction(tr("&Connect..."), this);
+    actionConnect = new QAction(tr("&Connect") + "...", this);
     actionConnect->setShortcut(Qt::CTRL | Qt::Key_C);
     connect(actionConnect, SIGNAL(triggered()), this, SLOT(showConnectionsDialog()));
 
@@ -276,11 +287,14 @@ void MainWindow::initActions(void)
     actionQuit->setShortcut(Qt::CTRL | Qt::Key_Q);
     connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
-    actionAddOrganizationalUnit = new QAction(tr("Organizational &unit"), this);
+    actionSettings = new QAction(tr("&Settings") + "...", this);
+    connect(actionSettings, SIGNAL(triggered()), this, SLOT(showSettingsDialog()));
+
+    actionAddOrganizationalUnit = new QAction(tr("Organizational &unit") + "...", this);
     actionAddOrganizationalUnit->setShortcut(Qt::CTRL | Qt::Key_O);
     connect(actionAddOrganizationalUnit, SIGNAL(triggered()), this, SLOT(addOrganizationalUnit()));
 
-    actionAddNetworkHost = new QAction(tr("Network &host"), this);
+    actionAddNetworkHost = new QAction(tr("Network &host") + "...", this);
     actionAddNetworkHost->setShortcut(Qt::CTRL | Qt::Key_N);
     connect(actionAddNetworkHost, SIGNAL(triggered()), this, SLOT(addNetworkHost()));
     setAddActionsEnabled(false);
@@ -300,8 +314,11 @@ void MainWindow::initMenuBar(void)
     subMenu->addAction(actionAddOrganizationalUnit);
     subMenu->addAction(actionAddNetworkHost);
     menuEntry->addMenu(subMenu);
-
     menuEntry->addSeparator();
+
+    menuEntry->addAction(actionSettings);
+    menuEntry->addSeparator();
+
     menuEntry->addAction(actionQuit);
 }
 

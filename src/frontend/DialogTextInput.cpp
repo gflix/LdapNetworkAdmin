@@ -10,11 +10,11 @@
 #include <QtWidgets/QVBoxLayout>
 #include <frontend/DialogTextInput.h>
 
-DialogTextInput::DialogTextInput(const QString& title, const QString& prompt, QWidget* parent, Qt::WindowFlags flags):
+DialogTextInput::DialogTextInput(const QString& title, const QString& prompt, const QString& defaultText, QWidget* parent, Qt::WindowFlags flags):
     QDialog(parent, flags)
 {
     setWindowTitle(title);
-    initLayout(prompt);
+    initLayout(prompt, defaultText);
 }
 
 DialogTextInput::~DialogTextInput()
@@ -27,13 +27,14 @@ QString DialogTextInput::getTextInput(void) const
     return editText->text();
 }
 
-void DialogTextInput::initLayout(const QString& prompt)
+void DialogTextInput::initLayout(const QString& prompt, const QString& defaultText)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     layout->addWidget(new QLabel(prompt));
 
     editText = new QLineEdit();
+    editText->setText(defaultText);
     layout->addWidget(editText);
 
     QHBoxLayout* layoutDialogButtons = new QHBoxLayout();
@@ -45,4 +46,6 @@ void DialogTextInput::initLayout(const QString& prompt)
     layoutDialogButtons->addWidget(buttonCancel);
 
     layout->addLayout(layoutDialogButtons);
+
+    editText->setFocus();
 }

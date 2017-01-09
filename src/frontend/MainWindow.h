@@ -18,6 +18,7 @@
 #include <frontend/PanelDefault.h>
 #include <frontend/PanelOrganizationalUnit.h>
 #include <frontend/PanelNetworkHost.h>
+#include <frontend/Settings.h>
 
 namespace Flix {
 
@@ -28,6 +29,8 @@ class MainWindow: public QMainWindow {
     QAction* actionDisconnect;
     QAction* actionRefresh;
     QAction* actionQuit;
+
+    QAction* actionSettings;
 
     QAction* actionAddOrganizationalUnit;
     QAction* actionAddNetworkHost;
@@ -42,6 +45,7 @@ class MainWindow: public QMainWindow {
     QStackedWidget* stackedPanels;
 
     LdapConnection ldapConnection;
+    Settings settings;
 
     void initActions(void);
     void initMenuBar(void);
@@ -62,6 +66,7 @@ signals:
 public slots:
     void showConnectionsDialog(void);
     void disconnectFromLdapServer(void);
+    void showSettingsDialog(void);
     void addOrganizationalUnit(void);
     void addNetworkHost(void);
     void selectNetworkTreeItem(const QModelIndex& index);

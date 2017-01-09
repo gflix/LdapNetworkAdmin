@@ -46,6 +46,7 @@ add_executable(
 	src/frontend/PanelOrganizationalUnit.cpp
 	src/frontend/DialogConnections.cpp
 	src/frontend/DialogPassword.cpp
+	src/frontend/DialogSettings.cpp
 	src/frontend/DialogTextInput.cpp
 	src/frontend/ModelConnections.cpp
 	src/frontend/ModelNetworkTree.cpp

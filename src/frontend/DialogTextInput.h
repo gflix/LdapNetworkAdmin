@@ -20,9 +20,9 @@ class DialogTextInput: public QDialog {
     QPushButton* buttonOk;
     QPushButton* buttonCancel;
 
-    void initLayout(const QString& prompt);
+    void initLayout(const QString& prompt, const QString& defaultText);
 public:
-    DialogTextInput(const QString& title, const QString& prompt, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+    DialogTextInput(const QString& title, const QString& prompt, const QString& defaultText = QString(), QWidget *parent = 0, Qt::WindowFlags flags = 0);
     virtual ~DialogTextInput();
 
     QString getTextInput(void) const;
