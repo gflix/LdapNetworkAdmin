@@ -47,6 +47,8 @@ void DialogPassword::initLayout(void)
     layoutDialogButtons->addWidget(buttonCancel);
 
     layout->addLayout(layoutDialogButtons);
+
+    editPassword->setFocus();
 }
 
 } /* namespace Flix */
