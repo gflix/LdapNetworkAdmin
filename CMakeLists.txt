@@ -40,6 +40,7 @@ add_executable(
 	src/frontend/LdapNetworkAdmin.cpp
 	src/common/Common.cpp
 	src/frontend/MainWindow.cpp
+	src/frontend/Settings.cpp
 	src/frontend/GenericPanelItemEdit.cpp
 	src/frontend/PanelDefault.cpp
 	src/frontend/PanelNetworkHost.cpp
@@ -67,6 +68,7 @@ add_executable(
 	src/backend/DhcpHost.cpp
 	src/backend/GenericDnsZoneEntry.cpp	
 	src/backend/DnsZoneEntryA.cpp	
+	src/backend/DnsZoneEntryCName.cpp	
 	src/backend/DnsZoneEntryPtr.cpp	
 	src/common/Common.cpp
 	src/common/LdapConnection.cpp
