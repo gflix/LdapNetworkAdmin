@@ -34,6 +34,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+    delete networkTree;
 }
 
 void MainWindow::showConnectionsDialog(void)
@@ -210,10 +211,12 @@ void MainWindow::updateNetworkHost(void)
     }
     if (objectNetworkHost->getIpAddress() != networkHostSettings.ipAddress ||
         objectNetworkHost->getDescription() != networkHostSettings.description ||
-        objectNetworkHost->getMacAddress() != networkHostSettings.macAddress) {
+        objectNetworkHost->getMacAddress() != networkHostSettings.macAddress ||
+        objectNetworkHost->getCanonicalNames() != networkHostSettings.canonicalNames) {
         objectNetworkHost->setIpAddress(networkHostSettings.ipAddress);
         objectNetworkHost->setDescription(networkHostSettings.description);
         objectNetworkHost->setMacAddress(networkHostSettings.macAddress);
+        objectNetworkHost->setCanonicalNames(networkHostSettings.canonicalNames);
         if (!ldapConnection.updateObject((GenericLdapObject*) objectNetworkHost)) {
             QMessageBox::critical(this, tr("Error"), tr("Could not update the LDAP object") + '!');
             return;
@@ -350,7 +353,7 @@ void MainWindow::initLayout(void)
     panelOrganizationalUnit = new PanelOrganizationalUnit();
     connect(panelOrganizationalUnit, SIGNAL(triggeredSave()), SLOT(updateOrganizationalUnit()));
     connect(panelOrganizationalUnit, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
-    panelNetworkHost = new PanelNetworkHost();
+    panelNetworkHost = new PanelNetworkHost(settings);
     connect(panelNetworkHost, SIGNAL(triggeredSave()), SLOT(updateNetworkHost()));
     connect(panelNetworkHost, SIGNAL(triggeredDelete()), SLOT(deleteNetworkTreeItem()));
 
@@ -396,6 +399,7 @@ void MainWindow::setupPanelNetworkHost(GenericLdapObject* object)
     networkHostSettings.ipAddress = objectNetworkHost->getIpAddress();
     networkHostSettings.description = objectNetworkHost->getDescription();
     networkHostSettings.macAddress = objectNetworkHost->getMacAddress();
+    networkHostSettings.canonicalNames = objectNetworkHost->getCanonicalNames();
 
     panelNetworkHost->setSettings(networkHostSettings);
 }
