@@ -20,6 +20,7 @@
 #define XML_ATTRIBUTE_OUTPUT_PATH "outputPath"
 #define XML_ATTRIBUTE_PORT "port"
 #define XML_ATTRIBUTE_TTL "ttl"
+#define XML_ATTRIBUTE_ZONE_DEFAULT_IP_ADDRESS "zoneDefaultIpAddress"
 
 namespace Flix {
 
@@ -92,6 +93,7 @@ bool ConfigurationLoader::load(QDomElement& elementConfig)
     }
     configuration.dns.authoritativeNameserver = elementDns.attribute(XML_ATTRIBUTE_AUTHORITATIVE_NAMESERVER);
     configuration.dns.ttl = elementDns.attribute(XML_ATTRIBUTE_TTL).toInt(nullptr, 10);
+    configuration.dns.zoneDefaultIpAddress = elementDns.attribute(XML_ATTRIBUTE_ZONE_DEFAULT_IP_ADDRESS);
 
     if (configuration.outputPath.isEmpty() ||
         configuration.connection.host.isEmpty() ||

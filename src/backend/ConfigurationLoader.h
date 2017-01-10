@@ -22,6 +22,7 @@ struct LdapNetworkBackendConnection {
 struct LdapNetworkBackendDns {
     QString authoritativeNameserver;
     int ttl;
+    QString zoneDefaultIpAddress;
 };
 
 struct LdapNetworkBackendConfiguration {

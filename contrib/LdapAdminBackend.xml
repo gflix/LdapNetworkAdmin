@@ -2,5 +2,5 @@
 <!DOCTYPE LdapAdminBackend>
 <LdapAdminBackend outputPath="/etc/ldap-admin">
 	<Connection host="serv.benfm.de" port="389" baseDn="ou=NetworkHosts,dc=benfm,dc=de" />
-	<Dns authoritativeNameserver="serv.benfm.de" ttl="3600" />
+	<Dns authoritativeNameserver="serv.benfm.de" ttl="3600" zoneDefaultIpAddress="10.1.0.1" />
 </LdapAdminBackend>

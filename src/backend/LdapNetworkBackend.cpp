@@ -109,6 +109,9 @@ bool generateDnsForwardZoneFile(const QDir& dirOutput, const QString& serialNumb
         ". root." << dnsForwardZoneIdentifier <<
         ". " << serialNumber << " 4H 12H 1w 3H" << endl;
     streamDnsZone << "@ IN NS " << configurationDns.authoritativeNameserver << "." << endl;
+    if (!configurationDns.zoneDefaultIpAddress.isEmpty()) {
+        streamDnsZone << "@ IN A " << configurationDns.zoneDefaultIpAddress << endl;
+    }
     streamDnsZone << endl;
 
     for (auto& dnsZoneEntry: dnsForwardZoneEntries) {
