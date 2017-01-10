@@ -14,6 +14,7 @@
 #include <backend/ConfigurationLoader.h>
 #include <backend/DhcpHost.h>
 #include <backend/DnsZoneEntryA.h>
+#include <backend/DnsZoneEntryCName.h>
 #include <backend/DnsZoneEntryPtr.h>
 #include <common/LdapConnection.h>
 #include <common/LdapObjectNetworkHost.h>
@@ -47,6 +48,13 @@ void processNetworkHost(const Flix::LdapObjectNetworkHost* object, Flix::DhcpHos
 
     Flix::DnsZoneEntryA* dnsZoneEntryA = new Flix::DnsZoneEntryA(object->getDescription(), regexHostParts.cap(1), object->getIpAddress());
     dnsForwardZones[regexHostParts.cap(2)].push_back(Flix::DnsZoneEntry(dnsZoneEntryA));
+
+    for (auto& canonicalName: object->getCanonicalNames()) {
+        if (regexHostParts.exactMatch(canonicalName)) {
+            Flix::DnsZoneEntryCName* dnsZoneEntryCName = new Flix::DnsZoneEntryCName(object->getDescription(), regexHostParts.cap(1), object->getIdentifier());
+            dnsForwardZones[regexHostParts.cap(2)].push_back(Flix::DnsZoneEntry(dnsZoneEntryCName));
+        }
+    }
 
     Flix::DnsZoneEntryPtr* dnsZoneEntryPtr = new Flix::DnsZoneEntryPtr(object->getDescription(), object->getIdentifier(), regexIpAddressParts.cap(4));
     QString dnsReverseZone {
