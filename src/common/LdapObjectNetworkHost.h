@@ -8,6 +8,7 @@
 #ifndef SRC_LDAPOBJECTNETWORKHOST_H_
 #define SRC_LDAPOBJECTNETWORKHOST_H_
 
+#include <common/Common.h>
 #include <common/GenericLdapObject.h>
 
 namespace Flix {
@@ -21,10 +22,12 @@ public:
     QString getIpAddress(void) const;
     QString getDescription(void) const;
     QString getMacAddress(void) const;
+    CanonicalNames getCanonicalNames(void) const;
 
     void setIpAddress(const QString& ipAddress);
     void setDescription(const QString& ipAddress);
     void setMacAddress(const QString& macAddress);
+    void setCanonicalNames(const CanonicalNames& canonicalNames);
 
     static LdapObjectNetworkHost* create(const QString& distinguishedName, const QString& ipAddress);
 };

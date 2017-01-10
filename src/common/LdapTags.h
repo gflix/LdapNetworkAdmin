@@ -8,6 +8,7 @@
 #ifndef SRC_LDAPTAGS_H_
 #define SRC_LDAPTAGS_H_
 
+#define LDAP_ATTRIBUTE_CN "cn"
 #define LDAP_ATTRIBUTE_DESCRIPTION "description"
 #define LDAP_ATTRIBUTE_IP_HOST_NUMBER "ipHostNumber"
 #define LDAP_ATTRIBUTE_MAC_ADDRESS "macAddress"

@@ -53,7 +53,7 @@ public:
     GenericLdapObject* getObject(void) const;
 };
 
-
+typedef QList<QString> CanonicalNames;
 typedef QList<QString> LdapDistinguishedNameParts;
 
 QString joinDistinguishedName(const LdapDistinguishedNameParts& parts);

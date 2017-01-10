@@ -56,6 +56,13 @@ QString LdapObjectNetworkHost::getMacAddress(void) const
     return macAddress;
 }
 
+CanonicalNames LdapObjectNetworkHost::getCanonicalNames(void) const
+{
+    CanonicalNames canonicalNames = getAttribute(LDAP_ATTRIBUTE_CN);
+    canonicalNames.removeAll(getIdentifier());
+    return canonicalNames;
+}
+
 void LdapObjectNetworkHost::setIpAddress(const QString& ipAddress)
 {
     setSingleAttribute(LDAP_ATTRIBUTE_IP_HOST_NUMBER, ipAddress);
@@ -68,7 +75,16 @@ void LdapObjectNetworkHost::setDescription(const QString& description)
 
 void LdapObjectNetworkHost::setMacAddress(const QString& macAddress)
 {
-    setSingleAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddress);}
+    setSingleAttribute(LDAP_ATTRIBUTE_MAC_ADDRESS, macAddress);
+}
+
+void LdapObjectNetworkHost::setCanonicalNames(const CanonicalNames& canonicalNames)
+{
+    LdapAttributeValues ldapCanonicalNames = canonicalNames;
+    ldapCanonicalNames.removeAll(getIdentifier());
+    ldapCanonicalNames.push_back(getIdentifier());
+    setAttribute(LDAP_ATTRIBUTE_CN, ldapCanonicalNames);
+}
 
 LdapObjectNetworkHost* LdapObjectNetworkHost::create(const QString& distinguishedName, const QString& ipAddress)
 {
